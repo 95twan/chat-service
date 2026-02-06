@@ -1,3 +1,3 @@
 spring:
   application:
-    name: chat
+    name: chat-service
