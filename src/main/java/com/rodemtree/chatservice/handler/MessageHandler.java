@@ -2,6 +2,8 @@ package com.rodemtree.chatservice.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rodemtree.chatservice.dto.Message;
+import com.rodemtree.chatservice.entity.MessageEntity;
+import com.rodemtree.chatservice.repository.MessageRepository;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +21,11 @@ public class MessageHandler extends TextWebSocketHandler {
     public static final Logger log = LoggerFactory.getLogger(MessageHandler.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final WebSocketSessionManager webSocketSessionManager;
+    private final MessageRepository messageRepository;
 
-    public MessageHandler(WebSocketSessionManager webSocketSessionManager) {
+    public MessageHandler(WebSocketSessionManager webSocketSessionManager, MessageRepository messageRepository) {
         this.webSocketSessionManager = webSocketSessionManager;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -52,6 +56,9 @@ public class MessageHandler extends TextWebSocketHandler {
 
         try {
             Message receivedMessage = objectMapper.readValue(payload, Message.class);
+
+            messageRepository.save(new MessageEntity(receivedMessage.username(), receivedMessage.content()));
+
             webSocketSessionManager.getSessions().forEach(participantSession -> {
                 if (!participantSession.getId().equals(senderSession.getId())) {
                     sendMessage(participantSession, receivedMessage);
