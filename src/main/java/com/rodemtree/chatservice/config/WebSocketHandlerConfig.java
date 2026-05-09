@@ -1,6 +1,6 @@
-package com.rodemtree.chat.config;
+package com.rodemtree.chatservice.config;
 
-import com.rodemtree.chat.handler.MessageHandler;
+import com.rodemtree.chatservice.handler.MessageHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
