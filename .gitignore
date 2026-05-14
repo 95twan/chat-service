@@ -2,6 +2,10 @@
 
 .env
 
+application-test.yaml
+
+docker/data/*
+
 HELP.md
 .gradle
 build/

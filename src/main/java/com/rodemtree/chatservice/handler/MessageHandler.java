@@ -1,9 +1,14 @@
 package com.rodemtree.chatservice.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rodemtree.chatservice.dto.Message;
+import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.dto.domain.Message;
+import com.rodemtree.chatservice.dto.websocket.inbound.BaseRequest;
+import com.rodemtree.chatservice.dto.websocket.inbound.KeepAliveRequest;
+import com.rodemtree.chatservice.dto.websocket.inbound.MessageRequest;
 import com.rodemtree.chatservice.entity.MessageEntity;
 import com.rodemtree.chatservice.repository.MessageRepository;
+import com.rodemtree.chatservice.service.SessionService;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +27,12 @@ public class MessageHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final WebSocketSessionManager webSocketSessionManager;
     private final MessageRepository messageRepository;
+    private final SessionService sessionService;
 
-    public MessageHandler(WebSocketSessionManager webSocketSessionManager, MessageRepository messageRepository) {
+    public MessageHandler(WebSocketSessionManager webSocketSessionManager, MessageRepository messageRepository, SessionService sessionService) {
         this.webSocketSessionManager = webSocketSessionManager;
         this.messageRepository = messageRepository;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -51,19 +58,24 @@ public class MessageHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession senderSession, TextMessage message) {
-        log.info("Received message: [{}] from {}", message.getPayload(), senderSession.getId());
         String payload = message.getPayload();
+        log.info("Received message: [{}] from {}", message.getPayload(), senderSession.getId());
 
         try {
-            Message receivedMessage = objectMapper.readValue(payload, Message.class);
+            BaseRequest baseRequest = objectMapper.readValue(payload, BaseRequest.class);
 
-            messageRepository.save(new MessageEntity(receivedMessage.username(), receivedMessage.content()));
+            if (baseRequest instanceof MessageRequest messageRequest) {
+                Message receivedMessage = new Message(messageRequest.getUsername(), messageRequest.getContent());
+                messageRepository.save(new MessageEntity(receivedMessage.username(), receivedMessage.content()));
 
-            webSocketSessionManager.getSessions().forEach(participantSession -> {
-                if (!participantSession.getId().equals(senderSession.getId())) {
-                    sendMessage(participantSession, receivedMessage);
-                }
-            });
+                webSocketSessionManager.getSessions().forEach(participantSession -> {
+                    if (!participantSession.getId().equals(senderSession.getId())) {
+                        sendMessage(participantSession, receivedMessage);
+                    }
+                });
+            } else if (baseRequest instanceof KeepAliveRequest keepAliveRequest) {
+                sessionService.refreshTTL((String) senderSession.getAttributes().get(Constants.HTTP_SESSION_ID.getValue()));
+            }
 
         } catch (Exception e) {
             String errorMessage = "유효안 프로토콜이 아닙니다.";

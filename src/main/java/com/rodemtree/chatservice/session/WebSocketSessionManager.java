@@ -20,7 +20,7 @@ public class WebSocketSessionManager {
     }
 
     public void storeSession(WebSocketSession webSocketSession) {
-        log.info("Stroe Session: {}", webSocketSession.getId());
+        log.info("Store Session: {}", webSocketSession.getId());
         sessions.put(webSocketSession.getId(), webSocketSession);
     }
 
