@@ -12,3 +12,16 @@ services:
     volumes:
       - ./data/mysql:/var/lib/mysql
 
+  redis:
+    image: redis:7.4.9
+    ports:
+      - "16000:6379"
+    volumes:
+      - ./data/redis/data:/data
+
+  redis-insight:
+    image: redis/redisinsight:2.70.1
+    ports:
+      - "15000:5540"
+    volumes:
+      - ./data/redis-insight:/data
