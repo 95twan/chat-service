@@ -4,26 +4,21 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rodemtree.chatservice.constant.MessageType;
 
-public class MessageRequest extends BaseRequest {
+public class AcceptRequest extends BaseRequest {
 
     private final String username;
-    private final String content;
+
 
     @JsonCreator
-    public MessageRequest(
-            @JsonProperty("username") String username,
-            @JsonProperty("content") String content
+    public AcceptRequest(
+            @JsonProperty("username") String username
     ) {
-        super(MessageType.MESSAGE);
+        super(MessageType.ACCEPT_REQUEST);
         this.username = username;
-        this.content = content;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public String getContent() {
-        return content;
-    }
 }
