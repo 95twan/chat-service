@@ -3,6 +3,7 @@ package com.rodemtree.chatservice.service;
 import com.rodemtree.chatservice.dto.domain.InviteCode;
 import com.rodemtree.chatservice.dto.domain.User;
 import com.rodemtree.chatservice.dto.domain.UserId;
+import com.rodemtree.chatservice.dto.projection.ConnectionCountProjection;
 import com.rodemtree.chatservice.dto.projection.InviteCodeProjection;
 import com.rodemtree.chatservice.dto.projection.UsernameProjection;
 import com.rodemtree.chatservice.entity.UserEntity;
@@ -47,6 +48,11 @@ public class UserService {
     public Optional<InviteCode> getInviteCode(UserId userId) {
         return userRepository.findInviteCodeByUserId(userId.id())
                 .map(inviteCode -> new InviteCode(inviteCode.getConnectionInviteCode()));
+    }
+
+    public Optional<Integer> getConnectionCount(UserId userId) {
+        return userRepository.findConnectionCountByUserId(userId.id())
+                .map(ConnectionCountProjection::getConnectionCount);
     }
 
     @Transactional

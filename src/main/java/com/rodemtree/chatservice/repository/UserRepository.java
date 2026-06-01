@@ -1,5 +1,6 @@
 package com.rodemtree.chatservice.repository;
 
+import com.rodemtree.chatservice.dto.projection.ConnectionCountProjection;
 import com.rodemtree.chatservice.dto.projection.InviteCodeProjection;
 import com.rodemtree.chatservice.dto.projection.UsernameProjection;
 import com.rodemtree.chatservice.entity.UserEntity;
@@ -18,6 +19,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByConnectionInviteCode(@NonNull String connectionInviteCode);
 
     Optional<InviteCodeProjection> findInviteCodeByUserId(@NonNull Long userId);
+
+    Optional<ConnectionCountProjection> findConnectionCountByUserId(@NonNull Long userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<UserEntity> findForUpdateByUserId(@NonNull Long userId);

@@ -1,7 +1,6 @@
 package com.rodemtree.chatservice.integration
 
 import com.rodemtree.chatservice.ChatApplication
-import com.rodemtree.chatservice.dto.domain.InviteCode
 import com.rodemtree.chatservice.dto.domain.UserId
 import com.rodemtree.chatservice.repository.UserConnectionRepository
 import com.rodemtree.chatservice.repository.UserRepository

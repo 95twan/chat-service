@@ -1,10 +1,12 @@
 package com.rodemtree.chatservice.service;
 
 import com.rodemtree.chatservice.constant.UserConnectionStatus;
+import com.rodemtree.chatservice.dto.domain.Connection;
 import com.rodemtree.chatservice.dto.domain.InviteCode;
 import com.rodemtree.chatservice.dto.domain.User;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.projection.UserConnectionStatusProjection;
+import com.rodemtree.chatservice.dto.projection.UserIdUsernameProjection;
 import com.rodemtree.chatservice.entity.UserConnectionEntity;
 import com.rodemtree.chatservice.repository.UserConnectionRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,7 +17,9 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +31,13 @@ public class UserConnectionService {
     private final UserConnectionLimitService userConnectionLimitService;
     private final UserConnectionRepository userConnectionRepository;
 
+
+    public List<Connection> getConnectionsByStatus(UserId userId, UserConnectionStatus status) {
+        List<UserIdUsernameProjection> userA = userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(userId.id(), status);
+        List<UserIdUsernameProjection> userB = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(userId.id(), status);
+
+        return Stream.concat(userA.stream(), userB.stream()).map(user -> new Connection(user.getUsername(), status)).toList();
+    }
 
     @Transactional
     public Pair<Optional<UserId>, String> invite(UserId inviterUserId, InviteCode inviteCode) {
@@ -41,12 +52,15 @@ public class UserConnectionService {
         String partnerUsername = partner.get().username();
 
         if (partnerUserId.equals(inviterUserId)) {
-            return Pair.of(Optional.empty(), "Cannot self invite");
+            return Pair.of(Optional.empty(), "Cannot self invite.");
         }
 
         UserConnectionStatus userConnectionStatus = getStatus(inviterUserId, partnerUserId);
         return switch (userConnectionStatus) {
             case NONE, DISCONNECTED -> {
+                if (userService.getConnectionCount(inviterUserId).filter(count -> count >= userConnectionLimitService.getLimitConnection()).isPresent()) {
+                    yield Pair.of(Optional.empty(), "Connection limit reached.");
+                }
                 Optional<String> inviterUsername = userService.getUsername(inviterUserId);
                 if (inviterUsername.isEmpty()) {
                     log.warn("InviteRequest failed.");
@@ -106,6 +120,26 @@ public class UserConnectionService {
         } catch (IllegalStateException ex) {
             return Pair.of(Optional.empty(), ex.getMessage());
         }
+    }
+
+    public Pair<Boolean, String> rejectInvite(UserId rejectorUserId, String inviterUsername) {
+        return userService.getUserId(inviterUsername)
+                .filter(inviterUserId -> !inviterUserId.equals(rejectorUserId))
+                .filter(inviterUserId ->
+                        getInviterUserId(inviterUserId, rejectorUserId)
+                                .filter(invitationSenderUserId -> invitationSenderUserId.equals(inviterUserId)).isPresent()
+                )
+                .filter(inviterUserId -> getStatus(inviterUserId, rejectorUserId) == UserConnectionStatus.PENDING)
+                .map(inviterUserId -> {
+                    try {
+                        setStatus(inviterUserId, rejectorUserId, UserConnectionStatus.REJECTED);
+                        return Pair.of(true, inviterUsername);
+                    } catch (Exception ex) {
+                        log.error("Set reject failed. cause: {}", ex.getMessage());
+                        return Pair.of(false, "Reject failed.");
+                    }
+                })
+                .orElse(Pair.of(false, "Reject failed."));
     }
 
     private Optional<UserId> getInviterUserId(UserId partnerAUserId, UserId partnerBUserId) {
