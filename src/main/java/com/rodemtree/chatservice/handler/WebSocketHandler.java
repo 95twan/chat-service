@@ -3,7 +3,7 @@ package com.rodemtree.chatservice.handler;
 import com.rodemtree.chatservice.constant.Constants;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.BaseRequest;
-import com.rodemtree.chatservice.handler.websocket.RequestHandlerDispatcher;
+import com.rodemtree.chatservice.handler.websocket.RequestDispatcher;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import com.rodemtree.chatservice.util.JsonUtil;
 import org.slf4j.Logger;
@@ -22,16 +22,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public static final Logger log = LoggerFactory.getLogger(WebSocketHandler.class);
     private final JsonUtil jsonUtil;
     private final WebSocketSessionManager webSocketSessionManager;
-    private final RequestHandlerDispatcher requestHandlerDispatcher;
+    private final RequestDispatcher requestDispatcher;
 
     public WebSocketHandler(
             JsonUtil jsonUtil,
             WebSocketSessionManager webSocketSessionManager,
-            RequestHandlerDispatcher requestHandlerDispatcher
+            RequestDispatcher requestDispatcher
     ) {
         this.jsonUtil = jsonUtil;
         this.webSocketSessionManager = webSocketSessionManager;
-        this.requestHandlerDispatcher = requestHandlerDispatcher;
+        this.requestDispatcher = requestDispatcher;
     }
 
     @Override
@@ -62,6 +62,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         log.info("Received message: [{}] from {}", message.getPayload(), senderSession.getId());
         jsonUtil.fromJson(payload, BaseRequest.class)
-                .ifPresent(msg -> requestHandlerDispatcher.dispatchRequest(senderSession, msg));
+                .ifPresent(msg -> requestDispatcher.dispatchRequest(senderSession, msg));
     }
 }
