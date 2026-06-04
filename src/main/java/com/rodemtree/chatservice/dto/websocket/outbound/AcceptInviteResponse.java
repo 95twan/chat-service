@@ -4,12 +4,12 @@ import com.rodemtree.chatservice.constant.MessageType;
 import lombok.Getter;
 
 @Getter
-public class InviteNotification extends BaseMessage {
+public class AcceptInviteResponse extends BaseMessage {
 
     private final String username;
 
-    public InviteNotification(String username) {
-        super(MessageType.ASK_INVITE);
+    public AcceptInviteResponse(String username) {
+        super(MessageType.ACCEPT_INVITE_RESPONSE);
         this.username = username;
     }
 }

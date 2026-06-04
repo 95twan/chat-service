@@ -10,6 +10,7 @@ import com.rodemtree.chatservice.dto.websocket.outbound.InviteNotification;
 import com.rodemtree.chatservice.dto.websocket.outbound.InviteResponse;
 import com.rodemtree.chatservice.service.UserConnectionService;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -19,6 +20,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class InviteRequestHandler implements BaseRequestHandler<InviteRequest> {
 
 
@@ -27,10 +29,6 @@ public class InviteRequestHandler implements BaseRequestHandler<InviteRequest> {
     private final UserConnectionService userConnectionService;
     private final WebSocketSessionManager webSocketSessionManager;
 
-    public InviteRequestHandler(UserConnectionService userConnectionService, WebSocketSessionManager webSocketSessionManager) {
-        this.userConnectionService = userConnectionService;
-        this.webSocketSessionManager = webSocketSessionManager;
-    }
 
     @Override
     public void handle(WebSocketSession senderSession, InviteRequest request) {

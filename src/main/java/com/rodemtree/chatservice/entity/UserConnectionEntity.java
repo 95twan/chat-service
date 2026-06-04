@@ -2,9 +2,11 @@ package com.rodemtree.chatservice.entity;
 
 import com.rodemtree.chatservice.constant.UserConnectionStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.Objects;
 
+@Getter
 @Entity
 @Table(name = "user_connection")
 @IdClass(UserConnectionId.class)
@@ -33,22 +35,6 @@ public class UserConnectionEntity extends BaseEntity {
         this.partnerBUserId = partnerBUserId;
         this.status = status;
         this.inviterUserId = inviterUserId;
-    }
-
-    public Long getPartnerAUserId() {
-        return partnerAUserId;
-    }
-
-    public Long getPartnerBUserId() {
-        return partnerBUserId;
-    }
-
-    public UserConnectionStatus getStatus() {
-        return status;
-    }
-
-    public Long getInviterUserId() {
-        return inviterUserId;
     }
 
     public void setStatus(UserConnectionStatus status) {

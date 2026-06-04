@@ -16,5 +16,4 @@ public class FetchConnectionsRequest extends BaseRequest {
         super(MessageType.FETCH_CONNECTIONS_REQUEST);
         this.status = status;
     }
-
 }

@@ -17,5 +17,4 @@ public class DisconnectRequest extends BaseRequest {
         super(MessageType.DISCONNECT_REQUEST);
         this.username = username;
     }
-
 }

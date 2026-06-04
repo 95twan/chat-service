@@ -86,7 +86,7 @@ class UserConnectionServiceSpec extends Specification {
         }
 
         when:
-        def result = userConnectionService.accept(senderUserId, targetUserName)
+        def result = userConnectionService.acceptInvite(senderUserId, targetUserName)
 
         then:
         result == expectedResult

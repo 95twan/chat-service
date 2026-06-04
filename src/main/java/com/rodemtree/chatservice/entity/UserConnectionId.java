@@ -1,8 +1,11 @@
 package com.rodemtree.chatservice.entity;
 
+import lombok.Getter;
+
 import java.io.Serializable;
 import java.util.Objects;
 
+@Getter
 public class UserConnectionId implements Serializable {
 
     private Long partnerAUserId;
@@ -14,14 +17,6 @@ public class UserConnectionId implements Serializable {
     public UserConnectionId(Long partnerAUserId, Long partnerBUserId) {
         this.partnerAUserId = partnerAUserId;
         this.partnerBUserId = partnerBUserId;
-    }
-
-    public Long getPartnerAUserId() {
-        return partnerAUserId;
-    }
-
-    public Long getPartnerBUserId() {
-        return partnerBUserId;
     }
 
     @Override

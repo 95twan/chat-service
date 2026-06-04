@@ -7,8 +7,8 @@ public class MessageType {
     public static final String FETCH_CONNECTIONS_RESPONSE = "FETCH_CONNECTIONS_RESPONSE";
     public static final String INVITE_REQUEST = "INVITE_REQUEST";
     public static final String INVITE_RESPONSE = "INVITE_RESPONSE";
-    public static final String ACCEPT_REQUEST = "ACCEPT_REQUEST";
-    public static final String ACCEPT_RESPONSE = "ACCEPT_RESPONSE";
+    public static final String ACCEPT_INVITE_REQUEST = "ACCEPT_INVITE_REQUEST";
+    public static final String ACCEPT_INVITE_RESPONSE = "ACCEPT_INVITE_RESPONSE";
     public static final String REJECT_INVITE_REQUEST = "REJECT_INVITE_REQUEST";
     public static final String REJECT_INVITE_RESPONSE = "REJECT_INVITE_RESPONSE";
     public static final String DISCONNECT_REQUEST = "DISCONNECT_REQUEST";
@@ -17,7 +17,7 @@ public class MessageType {
 
     // Notification
     public static final String ASK_INVITE = "ASK_INVITE";
-    public static final String NOTIFY_ACCEPT = "NOTIFY_ACCEPT";
+    public static final String NOTIFY_ACCEPT_INVITE = "NOTIFY_ACCEPT_INVITE";
     public static final String NOTIFY_MESSAGE = "NOTIFY_MESSAGE";
     public static final String KEEP_ALIVE = "KEEP_ALIVE";
     public static final String ERROR = "ERROR";

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.dto.domain.InviteCode;
+import lombok.Getter;
 
+@Getter
 public class InviteRequest extends BaseRequest {
 
     private final InviteCode userInviteCode;
@@ -16,9 +18,4 @@ public class InviteRequest extends BaseRequest {
         super(MessageType.INVITE_REQUEST);
         this.userInviteCode = userInviteCode;
     }
-
-    public InviteCode getUserInviteCode() {
-        return userInviteCode;
-    }
-
 }

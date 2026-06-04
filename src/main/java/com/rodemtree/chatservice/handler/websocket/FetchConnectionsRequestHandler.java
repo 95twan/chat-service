@@ -1,28 +1,19 @@
 package com.rodemtree.chatservice.handler.websocket;
 
 import com.rodemtree.chatservice.constant.Constants;
-import com.rodemtree.chatservice.constant.MessageType;
-import com.rodemtree.chatservice.constant.UserConnectionStatus;
 import com.rodemtree.chatservice.dto.domain.Connection;
-import com.rodemtree.chatservice.dto.domain.User;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.FetchConnectionsRequest;
-import com.rodemtree.chatservice.dto.websocket.inbound.InviteRequest;
-import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.FetchConnectionsResponse;
-import com.rodemtree.chatservice.dto.websocket.outbound.InviteNotification;
-import com.rodemtree.chatservice.dto.websocket.outbound.InviteResponse;
 import com.rodemtree.chatservice.service.UserConnectionService;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor

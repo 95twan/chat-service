@@ -7,12 +7,14 @@ import com.rodemtree.chatservice.entity.UserEntity;
 import com.rodemtree.chatservice.repository.UserConnectionRepository;
 import com.rodemtree.chatservice.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class UserConnectionLimitService {
 
     private final UserRepository userRepository;
@@ -20,10 +22,6 @@ public class UserConnectionLimitService {
 
     private int limitConnection = 1_000;
 
-    public UserConnectionLimitService(UserRepository userRepository, UserConnectionRepository userConnectionRepository) {
-        this.userRepository = userRepository;
-        this.userConnectionRepository = userConnectionRepository;
-    }
 
     public int getLimitConnection() {
         return limitConnection;
@@ -34,7 +32,7 @@ public class UserConnectionLimitService {
     }
 
     @Transactional
-    public void accept(UserId acceptorUserId, UserId inviterUserId) {
+    public void acceptInvite(UserId acceptorUserId, UserId inviterUserId) {
         Long firstUserId = Long.min(acceptorUserId.id(), inviterUserId.id());
         Long secondUserId = Long.max(acceptorUserId.id(), inviterUserId.id());
 

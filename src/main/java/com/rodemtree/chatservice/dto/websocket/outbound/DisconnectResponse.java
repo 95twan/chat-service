@@ -15,5 +15,4 @@ public class DisconnectResponse extends BaseMessage {
         this.username = username;
         this.status = status;
     }
-
 }

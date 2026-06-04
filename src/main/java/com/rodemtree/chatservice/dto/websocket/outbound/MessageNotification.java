@@ -1,7 +1,9 @@
 package com.rodemtree.chatservice.dto.websocket.outbound;
 
 import com.rodemtree.chatservice.constant.MessageType;
+import lombok.Getter;
 
+@Getter
 public class MessageNotification extends BaseMessage {
 
     private final String username;
@@ -12,13 +14,5 @@ public class MessageNotification extends BaseMessage {
         super(MessageType.NOTIFY_MESSAGE);
         this.username = username;
         this.content = content;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getContent() {
-        return content;
     }
 }

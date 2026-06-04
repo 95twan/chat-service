@@ -6,6 +6,7 @@ import com.rodemtree.chatservice.dto.websocket.inbound.BaseRequest;
 import com.rodemtree.chatservice.handler.websocket.RequestDispatcher;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import com.rodemtree.chatservice.util.JsonUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -17,6 +18,7 @@ import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorato
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @Component
+@RequiredArgsConstructor
 public class WebSocketHandler extends TextWebSocketHandler {
 
     public static final Logger log = LoggerFactory.getLogger(WebSocketHandler.class);
@@ -24,15 +26,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private final WebSocketSessionManager webSocketSessionManager;
     private final RequestDispatcher requestDispatcher;
 
-    public WebSocketHandler(
-            JsonUtil jsonUtil,
-            WebSocketSessionManager webSocketSessionManager,
-            RequestDispatcher requestDispatcher
-    ) {
-        this.jsonUtil = jsonUtil;
-        this.webSocketSessionManager = webSocketSessionManager;
-        this.requestDispatcher = requestDispatcher;
-    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {

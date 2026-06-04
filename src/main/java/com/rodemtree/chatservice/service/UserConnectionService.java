@@ -5,11 +5,12 @@ import com.rodemtree.chatservice.dto.domain.Connection;
 import com.rodemtree.chatservice.dto.domain.InviteCode;
 import com.rodemtree.chatservice.dto.domain.User;
 import com.rodemtree.chatservice.dto.domain.UserId;
-import com.rodemtree.chatservice.dto.projection.UserIdUsernameProjection;
+import com.rodemtree.chatservice.dto.projection.UserIdUsernameInviterUserIdProjection;
 import com.rodemtree.chatservice.entity.UserConnectionEntity;
 import com.rodemtree.chatservice.repository.UserConnectionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -21,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserConnectionService {
 
     private static final Logger log = LoggerFactory.getLogger(UserConnectionService.class);
@@ -32,10 +33,17 @@ public class UserConnectionService {
 
 
     public List<Connection> getConnectionsByStatus(UserId userId, UserConnectionStatus status) {
-        List<UserIdUsernameProjection> userA = userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(userId.id(), status);
-        List<UserIdUsernameProjection> userB = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(userId.id(), status);
+        List<UserIdUsernameInviterUserIdProjection> userA = userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(userId.id(), status);
+        List<UserIdUsernameInviterUserIdProjection> userB = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(userId.id(), status);
 
-        return Stream.concat(userA.stream(), userB.stream()).map(user -> new Connection(user.getUsername(), status)).toList();
+        if (status == UserConnectionStatus.ACCEPTED) {
+            return Stream.concat(userA.stream(), userB.stream())
+                    .map(user -> new Connection(user.getUsername(), status)).toList();
+        } else {
+            return Stream.concat(userA.stream(), userB.stream())
+                    .filter(item -> !item.getInviterUserId().equals(userId.id()))
+                    .map(user -> new Connection(user.getUsername(), status)).toList();
+        }
     }
 
     @Transactional
@@ -81,7 +89,7 @@ public class UserConnectionService {
         };
     }
 
-    public Pair<Optional<UserId>, String> accept(UserId acceptorUserId, String inviterUsername) {
+    public Pair<Optional<UserId>, String> acceptInvite(UserId acceptorUserId, String inviterUsername) {
         Optional<UserId> userId = userService.getUserId(inviterUsername);
         if (userId.isEmpty()) {
             return Pair.of(Optional.empty(), "Invalid username.");
@@ -111,7 +119,7 @@ public class UserConnectionService {
         }
 
         try {
-            userConnectionLimitService.accept(acceptorUserId, inviterUserId);
+            userConnectionLimitService.acceptInvite(acceptorUserId, inviterUserId);
             return Pair.of(Optional.of(inviterUserId), acceptorUsername.get());
         } catch (EntityNotFoundException ex) {
             log.error("Accept failed. cause: {}", ex.getMessage());

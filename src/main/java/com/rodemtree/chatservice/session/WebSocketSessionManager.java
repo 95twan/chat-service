@@ -3,6 +3,7 @@ package com.rodemtree.chatservice.session;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.outbound.BaseMessage;
 import com.rodemtree.chatservice.util.JsonUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,15 +15,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 public class WebSocketSessionManager {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketSessionManager.class);
     private final Map<UserId, WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final JsonUtil jsonUtil;
 
-    public WebSocketSessionManager(JsonUtil jsonUtil) {
-        this.jsonUtil = jsonUtil;
-    }
 
     public List<WebSocketSession> getSessions() {
         return sessions.values().stream().toList();

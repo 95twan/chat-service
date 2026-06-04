@@ -2,6 +2,7 @@ package com.rodemtree.chatservice.handler.websocket;
 
 import com.rodemtree.chatservice.dto.websocket.inbound.BaseRequest;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @Component
 @SuppressWarnings({"rawtypes", "unchecked"})
+@RequiredArgsConstructor
 public class RequestDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(RequestDispatcher.class);
@@ -22,9 +24,6 @@ public class RequestDispatcher {
     private final Map<Class<? extends BaseRequest>, BaseRequestHandler<? extends BaseRequest>> handlerMap = new HashMap<>();
     private final ListableBeanFactory listableBeanFactory;
 
-    public RequestDispatcher(ListableBeanFactory listableBeanFactory) {
-        this.listableBeanFactory = listableBeanFactory;
-    }
 
     public <T extends BaseRequest> void dispatchRequest(WebSocketSession session, T request) {
         BaseRequestHandler<T> handler = (BaseRequestHandler<T>) handlerMap.get(request.getClass());

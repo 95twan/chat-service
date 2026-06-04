@@ -1,10 +1,12 @@
 package com.rodemtree.chatservice.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.Objects;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "chat_user")
 public class UserEntity extends BaseEntity {
@@ -33,26 +35,6 @@ public class UserEntity extends BaseEntity {
         this.username = username;
         this.password = password;
         this.connectionInviteCode = UUID.randomUUID().toString().replace("-", "");
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getConnectionInviteCode() {
-        return connectionInviteCode;
-    }
-
-    public int getConnectionCount() {
-        return connectionCount;
     }
 
     public void setConnectionCount(int connectionCount) {

@@ -15,5 +15,4 @@ public class RejectInviteResponse extends BaseMessage {
         this.username = username;
         this.status = status;
     }
-
 }

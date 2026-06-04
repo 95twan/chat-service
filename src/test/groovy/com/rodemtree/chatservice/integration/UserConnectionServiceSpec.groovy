@@ -41,7 +41,7 @@ class UserConnectionServiceSpec extends Specification {
         def inviteCodeA = userService.getInviteCode(userIdA).get()
         (1..9).collect {
             userConnectionService.invite(userService.getUserId("testuser${it}").get(), inviteCodeA)
-            userConnectionService.accept(userIdA, "testuser${it}")
+            userConnectionService.acceptInvite(userIdA, "testuser${it}")
         }
         def inviteCodes = (10..19).collect {
             userService.getInviteCode(userService.getUserId("testuser${it}").get()).get()
@@ -54,7 +54,7 @@ class UserConnectionServiceSpec extends Specification {
         def threads = (10..19).collect { idx ->
             Thread.start {
                 def userId = userService.getUserId("testuser${idx}")
-                results << userConnectionService.accept(userId.get(), "testuser0").getFirst()
+                results << userConnectionService.acceptInvite(userId.get(), "testuser0").getFirst()
             }
         }
         threads*.join()
@@ -72,7 +72,7 @@ class UserConnectionServiceSpec extends Specification {
             userConnectionService.invite(userService.getUserId("testuser${it}").get(), inviteCodeA)
         }
         (1..5).each {
-            userConnectionService.accept(userIdA, "testuser${it}")
+            userConnectionService.acceptInvite(userIdA, "testuser${it}")
         }
 
         def results = Collections.synchronizedList(new ArrayList<Boolean>())

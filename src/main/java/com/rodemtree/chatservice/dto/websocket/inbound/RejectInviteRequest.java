@@ -18,5 +18,4 @@ public class RejectInviteRequest extends BaseRequest {
         super(MessageType.REJECT_INVITE_REQUEST);
         this.username = username;
     }
-
 }

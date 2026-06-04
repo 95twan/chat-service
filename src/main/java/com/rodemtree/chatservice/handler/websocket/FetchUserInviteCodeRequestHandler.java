@@ -8,16 +8,15 @@ import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.FetchUserInviteCodeResponse;
 import com.rodemtree.chatservice.service.UserService;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FetchUserInviteCodeRequestHandler implements BaseRequestHandler<FetchUserInviteCodeRequest> {
-
 
     private static final Logger log = LoggerFactory.getLogger(FetchUserInviteCodeRequestHandler.class);
 
