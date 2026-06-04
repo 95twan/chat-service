@@ -1,9 +1,11 @@
 package com.rodemtree.chatservice.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.Objects;
 
+@Getter
 @Entity
 @Table(name = "message")
 public class MessageEntity extends BaseEntity {
@@ -26,18 +28,6 @@ public class MessageEntity extends BaseEntity {
     public MessageEntity(String username, String content) {
         this.username = username;
         this.content = content;
-    }
-
-    public Long getMessageSequence() {
-        return messageSequence;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getContent() {
-        return content;
     }
 
     @Override

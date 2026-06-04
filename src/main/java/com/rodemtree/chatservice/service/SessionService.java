@@ -1,5 +1,6 @@
 package com.rodemtree.chatservice.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.session.Session;
@@ -9,13 +10,11 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 
 @Service
+@RequiredArgsConstructor
 public class SessionService {
 
     private final SessionRepository<? extends Session> httpSessionRepository;
 
-    public SessionService(SessionRepository<? extends Session> httpSessionRepository) {
-        this.httpSessionRepository = httpSessionRepository;
-    }
 
     public String getUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

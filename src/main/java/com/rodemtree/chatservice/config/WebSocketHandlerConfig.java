@@ -1,7 +1,7 @@
 package com.rodemtree.chatservice.config;
 
 import com.rodemtree.chatservice.auth.WebSocketHttpSessionHandshakeInterceptor;
-import com.rodemtree.chatservice.handler.MessageHandler;
+import com.rodemtree.chatservice.handler.WebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -11,17 +11,17 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketHandlerConfig implements WebSocketConfigurer {
 
-    private final MessageHandler messageHandler;
+    private final WebSocketHandler webSocketHandler;
     private final WebSocketHttpSessionHandshakeInterceptor webSocketHttpSessionHandshakeInterceptor;
 
-    public WebSocketHandlerConfig(MessageHandler messageHandler, WebSocketHttpSessionHandshakeInterceptor webSocketHttpSessionHandshakeInterceptor) {
-        this.messageHandler = messageHandler;
+    public WebSocketHandlerConfig(WebSocketHandler webSocketHandler, WebSocketHttpSessionHandshakeInterceptor webSocketHttpSessionHandshakeInterceptor) {
+        this.webSocketHandler = webSocketHandler;
         this.webSocketHttpSessionHandshakeInterceptor = webSocketHttpSessionHandshakeInterceptor;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(messageHandler, "/ws/v1/message")
+        registry.addHandler(webSocketHandler, "/ws/v1/message")
                 .addInterceptors(webSocketHttpSessionHandshakeInterceptor);
     }
 }

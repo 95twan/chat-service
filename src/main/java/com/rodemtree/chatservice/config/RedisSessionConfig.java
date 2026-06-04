@@ -19,5 +19,4 @@ public class RedisSessionConfig {
         mapper.registerModules(SecurityJackson2Modules.getModules(getClass().getClassLoader()));
         return new GenericJackson2JsonRedisSerializer(mapper);
     }
-
 }

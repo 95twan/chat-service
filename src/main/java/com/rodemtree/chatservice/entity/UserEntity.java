@@ -1,12 +1,15 @@
 package com.rodemtree.chatservice.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.Objects;
+import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "chat_user")
-public class ChatUserEntity extends BaseEntity {
+public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,30 +22,29 @@ public class ChatUserEntity extends BaseEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-    public ChatUserEntity() {
+    @Column(name = "connection_invite_code", nullable = false)
+    private String connectionInviteCode;
+
+    @Column(name = "connection_count", nullable = false)
+    private int connectionCount;
+
+    public UserEntity() {
     }
 
-    public ChatUserEntity(String username, String password) {
+    public UserEntity(String username, String password) {
         this.username = username;
         this.password = password;
+        this.connectionInviteCode = UUID.randomUUID().toString().replace("-", "");
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
+    public void setConnectionCount(int connectionCount) {
+        this.connectionCount = connectionCount;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        ChatUserEntity that = (ChatUserEntity) o;
+        UserEntity that = (UserEntity) o;
         return Objects.equals(username, that.username);
     }
 

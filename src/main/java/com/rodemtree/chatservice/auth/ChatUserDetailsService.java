@@ -1,7 +1,7 @@
 package com.rodemtree.chatservice.auth;
 
-import com.rodemtree.chatservice.entity.ChatUserEntity;
-import com.rodemtree.chatservice.repository.ChatUserRepository;
+import com.rodemtree.chatservice.entity.UserEntity;
+import com.rodemtree.chatservice.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,20 +14,20 @@ public class ChatUserDetailsService implements UserDetailsService {
 
 
     private static final Logger log = LoggerFactory.getLogger(ChatUserDetailsService.class);
-    private final ChatUserRepository chatUserRepository;
+    private final UserRepository userRepository;
 
-    public ChatUserDetailsService(ChatUserRepository chatUserRepository) {
-        this.chatUserRepository = chatUserRepository;
+    public ChatUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        ChatUserEntity chatUserEntity = chatUserRepository.findByUsername(username)
+        UserEntity userEntity = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     log.info("User not found: {}", username);
                     return new UsernameNotFoundException("");
                 });
 
-        return new ChatUserDetails(chatUserEntity.getUserId(), chatUserEntity.getUsername(), chatUserEntity.getPassword());
+        return new ChatUserDetails(userEntity.getUserId(), userEntity.getUsername(), userEntity.getPassword());
     }
 }
