@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.handler.websocket;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.constant.UserConnectionStatus;
 import com.rodemtree.chatservice.dto.domain.UserId;
@@ -27,7 +27,7 @@ public class DisconnectRequestHandler implements BaseRequestHandler<DisconnectRe
 
     @Override
     public void handle(WebSocketSession senderSession, DisconnectRequest request) {
-        UserId senderUserId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+        UserId senderUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
         Pair<Boolean, String> result = userConnectionService.disconnect(senderUserId, request.getUsername());
         if (result.getFirst()) {
             webSocketSessionManager.sendMessage(senderSession, new DisconnectResponse(request.getUsername(), UserConnectionStatus.DISCONNECTED));

@@ -14,8 +14,10 @@ import lombok.Getter;
         @JsonSubTypes.Type(value = AcceptInviteRequest.class, name = MessageType.ACCEPT_INVITE_REQUEST),
         @JsonSubTypes.Type(value = RejectInviteRequest.class, name = MessageType.REJECT_INVITE_REQUEST),
         @JsonSubTypes.Type(value = DisconnectRequest.class, name = MessageType.DISCONNECT_REQUEST),
-        @JsonSubTypes.Type(value = WriteMessageRequest.class, name = MessageType.WRITE_MESSAGE),
-        @JsonSubTypes.Type(value = KeepAliveRequest.class, name = MessageType.KEEP_ALIVE)
+        @JsonSubTypes.Type(value = CreateChannelRequest.class, name = MessageType.CREATE_CHANNEL_REQUEST),
+        @JsonSubTypes.Type(value = EnterChannelRequest.class, name = MessageType.ENTER_CHANNEL_REQUEST),
+        @JsonSubTypes.Type(value = WriteMessage.class, name = MessageType.WRITE_MESSAGE),
+        @JsonSubTypes.Type(value = KeepAlive.class, name = MessageType.KEEP_ALIVE)
 })
 public abstract class BaseRequest {
     private final String type;

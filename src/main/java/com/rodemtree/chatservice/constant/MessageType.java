@@ -13,11 +13,16 @@ public class MessageType {
     public static final String REJECT_INVITE_RESPONSE = "REJECT_INVITE_RESPONSE";
     public static final String DISCONNECT_REQUEST = "DISCONNECT_REQUEST";
     public static final String DISCONNECT_RESPONSE = "DISCONNECT_RESPONSE";
+    public static final String CREATE_CHANNEL_REQUEST = "CREATE_CHANNEL_REQUEST";
+    public static final String CREATE_CHANNEL_RESPONSE = "CREATE_CHANNEL_RESPONSE";
+    public static final String ENTER_CHANNEL_REQUEST = "ENTER_CHANNEL_REQUEST";
+    public static final String ENTER_CHANNEL_RESPONSE = "ENTER_CHANNEL_RESPONSE";
     public static final String WRITE_MESSAGE = "WRITE_MESSAGE";
 
     // Notification
     public static final String ASK_INVITE = "ASK_INVITE";
     public static final String NOTIFY_ACCEPT_INVITE = "NOTIFY_ACCEPT_INVITE";
+    public static final String NOTIFY_JOIN_CHANNEL = "NOTIFY_JOIN_CHANNEL";
     public static final String NOTIFY_MESSAGE = "NOTIFY_MESSAGE";
     public static final String KEEP_ALIVE = "KEEP_ALIVE";
     public static final String ERROR = "ERROR";

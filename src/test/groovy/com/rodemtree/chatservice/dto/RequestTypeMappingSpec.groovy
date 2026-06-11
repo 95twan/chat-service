@@ -8,9 +8,9 @@ import com.rodemtree.chatservice.dto.websocket.inbound.DisconnectRequest
 import com.rodemtree.chatservice.dto.websocket.inbound.FetchConnectionsRequest
 import com.rodemtree.chatservice.dto.websocket.inbound.FetchUserInviteCodeRequest
 import com.rodemtree.chatservice.dto.websocket.inbound.InviteRequest
-import com.rodemtree.chatservice.dto.websocket.inbound.KeepAliveRequest
+import com.rodemtree.chatservice.dto.websocket.inbound.KeepAlive
 import com.rodemtree.chatservice.dto.websocket.inbound.RejectInviteRequest
-import com.rodemtree.chatservice.dto.websocket.inbound.WriteMessageRequest
+import com.rodemtree.chatservice.dto.websocket.inbound.WriteMessage
 import com.rodemtree.chatservice.util.JsonUtil
 import spock.lang.Specification
 
@@ -31,14 +31,14 @@ class RequestTypeMappingSpec extends Specification {
         validate(request)
 
         where:
-        payload                                                                       | expectedClass              | validate
-        '{"type": "FETCH_USER_INVITE_CODE_REQUEST"}'                                  | FetchUserInviteCodeRequest | { req -> (req as FetchUserInviteCodeRequest).getType() == 'FETCH_USER_INVITE_CODE_REQUEST' }
-        '{"type": "FETCH_CONNECTIONS_REQUEST", "status": "PENDING"}'                  | FetchConnectionsRequest    | { req -> (req as FetchConnectionsRequest).status == UserConnectionStatus.PENDING }
-        '{"type": "INVITE_REQUEST", "userInviteCode": "TestInviteCode123"}'           | InviteRequest              | { req -> (req as InviteRequest).userInviteCode.code() == 'TestInviteCode123' }
-        '{"type": "ACCEPT_INVITE_REQUEST", "username": "testuser"}'                          | AcceptInviteRequest | { req -> (req as AcceptInviteRequest).username == 'testuser' }
-        '{"type": "REJECT_INVITE_REQUEST", "username": "testuser"}'                   | RejectInviteRequest        | { req -> (req as RejectInviteRequest).username == 'testuser' }
-        '{"type": "DISCONNECT_REQUEST", "username": "testuser"}'                      | DisconnectRequest          | { req -> (req as DisconnectRequest).username == 'testuser' }
-        '{"type": "WRITE_MESSAGE", "username": "testUser", "content":"test message"}' | WriteMessageRequest        | { req -> (req as WriteMessageRequest).content == 'test message' }
-        '{"type": "KEEP_ALIVE"}'                                                      | KeepAliveRequest           | { req -> (req as KeepAliveRequest).getType() == 'KEEP_ALIVE' }
+        payload                                                               | expectedClass              | validate
+        '{"type": "FETCH_USER_INVITE_CODE_REQUEST"}'                          | FetchUserInviteCodeRequest | { req -> (req as FetchUserInviteCodeRequest).getType() == 'FETCH_USER_INVITE_CODE_REQUEST' }
+        '{"type": "FETCH_CONNECTIONS_REQUEST", "status": "PENDING"}'          | FetchConnectionsRequest    | { req -> (req as FetchConnectionsRequest).status == UserConnectionStatus.PENDING }
+        '{"type": "INVITE_REQUEST", "userInviteCode": "TestInviteCode123"}'   | InviteRequest              | { req -> (req as InviteRequest).userInviteCode.code() == 'TestInviteCode123' }
+        '{"type": "ACCEPT_INVITE_REQUEST", "username": "testuser"}'           | AcceptInviteRequest        | { req -> (req as AcceptInviteRequest).username == 'testuser' }
+        '{"type": "REJECT_INVITE_REQUEST", "username": "testuser"}'           | RejectInviteRequest        | { req -> (req as RejectInviteRequest).username == 'testuser' }
+        '{"type": "DISCONNECT_REQUEST", "username": "testuser"}'              | DisconnectRequest          | { req -> (req as DisconnectRequest).username == 'testuser' }
+        '{"type": "WRITE_MESSAGE", "channelId": 1, "content":"test message"}' | WriteMessage               | { req -> (req as WriteMessage).content == 'test message' }
+        '{"type": "KEEP_ALIVE"}'                                              | KeepAlive                  | { req -> (req as KeepAlive).getType() == 'KEEP_ALIVE' }
     }
 }

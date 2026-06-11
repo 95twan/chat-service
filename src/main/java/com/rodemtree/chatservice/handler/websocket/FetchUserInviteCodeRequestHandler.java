@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.handler.websocket;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.FetchUserInviteCodeRequest;
@@ -26,7 +26,7 @@ public class FetchUserInviteCodeRequestHandler implements BaseRequestHandler<Fet
 
     @Override
     public void handle(WebSocketSession senderSession, FetchUserInviteCodeRequest request) {
-        UserId userId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+        UserId userId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
 
         userService.getInviteCode(userId).ifPresentOrElse(inviteCode -> {
             webSocketSessionManager.sendMessage(senderSession, new FetchUserInviteCodeResponse(inviteCode));

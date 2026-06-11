@@ -1,6 +1,6 @@
 create table if not exists message (
     message_sequence bigint auto_increment,
-    user_name varchar(20) not null,
+    sender_user_id bigint not null,
     content varchar(1000) not null,
     created_at timestamp not null,
     updated_at timestamp not null,
@@ -32,4 +32,25 @@ create table if not exists user_connection (
     index idx_partner_b_user_id (partner_b_user_id),
     index idx_partner_a_user_id_status (partner_a_user_id, status),
     index idx_partner_b_user_id_status (partner_b_user_id, status)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci;
+
+create table if not exists channel (
+    channel_id bigint auto_increment,
+    title varchar(30) not null,
+    channel_invite_code varchar(32) not null,
+    head_count int not null,
+    created_at timestamp not null,
+    updated_at timestamp not null,
+    primary key (channel_id),
+    constraint unique_channel_invite_code unique (channel_invite_code)
+) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci;
+
+create table if not exists user_channel (
+    user_id bigint not null,
+    channel_id bigint not null,
+    last_read_message_seq bigint not null,
+    created_at timestamp not null,
+    updated_at timestamp not null,
+    primary key (user_id, channel_id),
+    index idx_channel_id (channel_id)
 ) engine=InnoDB default charset=utf8mb4 collate=utf8mb4_0900_ai_ci;

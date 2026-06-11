@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.handler.websocket;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.dto.domain.Connection;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.FetchConnectionsRequest;
@@ -28,7 +28,7 @@ public class FetchConnectionsRequestHandler implements BaseRequestHandler<FetchC
 
     @Override
     public void handle(WebSocketSession senderSession, FetchConnectionsRequest request) {
-        UserId userId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+        UserId userId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
         List<Connection> connections = userConnectionService.getConnectionsByStatus(userId, request.getStatus());
 
         webSocketSessionManager.sendMessage(senderSession, new FetchConnectionsResponse(connections));
