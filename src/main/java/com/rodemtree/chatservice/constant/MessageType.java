@@ -13,6 +13,8 @@ public class MessageType {
     public static final String REJECT_INVITE_RESPONSE = "REJECT_INVITE_RESPONSE";
     public static final String DISCONNECT_REQUEST = "DISCONNECT_REQUEST";
     public static final String DISCONNECT_RESPONSE = "DISCONNECT_RESPONSE";
+    public static final String FETCH_CHANNEL_INVITE_CODE_REQUEST = "FETCH_CHANNEL_INVITE_CODE_REQUEST";
+    public static final String FETCH_CHANNEL_INVITE_CODE_RESPONSE = "FETCH_CHANNEL_INVITE_CODE_RESPONSE";
     public static final String CREATE_CHANNEL_REQUEST = "CREATE_CHANNEL_REQUEST";
     public static final String CREATE_CHANNEL_RESPONSE = "CREATE_CHANNEL_RESPONSE";
     public static final String ENTER_CHANNEL_REQUEST = "ENTER_CHANNEL_REQUEST";

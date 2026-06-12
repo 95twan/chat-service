@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,10 @@ public interface UserConnectionRepository extends JpaRepository<UserConnectionEn
     Optional<UserConnectionEntity> findByPartnerAUserIdAndPartnerBUserIdAndStatus(@NonNull Long partnerAUserId, @NonNull Long partnerBUserId, @NonNull UserConnectionStatus status);
 
     Optional<InviterUserIdProjection> findInviterUserIdByPartnerAUserIdAndPartnerBUserId(@NonNull Long partnerAUserId, @NonNull Long partnerBUserId);
+
+    long countByPartnerAUserIdAndPartnerBUserIdInAndStatus(@NonNull Long partnerAUserId, @NonNull Collection<Long> partnerBUserId, @NonNull UserConnectionStatus status);
+
+    long countByPartnerBUserIdAndPartnerAUserIdInAndStatus(@NonNull Long partnerBUserId, @NonNull Collection<Long> partnerAUserId, @NonNull UserConnectionStatus status);
 
     @Query(
             "SELECT u.partnerBUserId AS userId, userB.username AS username, u.inviterUserId AS inviterUserId " +

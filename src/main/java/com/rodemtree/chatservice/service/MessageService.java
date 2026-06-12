@@ -2,16 +2,16 @@ package com.rodemtree.chatservice.service;
 
 import com.rodemtree.chatservice.dto.domain.ChannelId;
 import com.rodemtree.chatservice.dto.domain.UserId;
-import com.rodemtree.chatservice.dto.websocket.outbound.MessageNotification;
 import com.rodemtree.chatservice.entity.MessageEntity;
 import com.rodemtree.chatservice.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 @Service
@@ -19,9 +19,11 @@ import java.util.function.Consumer;
 public class MessageService {
 
     private static final Logger log = LoggerFactory.getLogger(MessageService.class);
+    private static final int SENDER_THREAD_POOL_SIZE = 10;
 
     private final MessageRepository messageRepository;
     private final ChannelService channelService;
+    private final ExecutorService senderThreadPool = Executors.newFixedThreadPool(SENDER_THREAD_POOL_SIZE);
 
 
     public void sendMessage(UserId senderUserId, ChannelId channelId, String content, Consumer<UserId> messageSender) {
@@ -32,13 +34,19 @@ public class MessageService {
             return;
         }
 
-        List<UserId> participantIds = channelService.getParticipantIds(channelId);
-        participantIds.stream()
-                .filter(userId -> !userId.equals(senderUserId))
+        // 반복문을 사용한 메시지 직렬 전송
+//        channelService.getOnlineParticipantIds(channelId).stream()
+//                .filter(participantId -> !participantId.equals(senderUserId))
+//                .forEach(messageSender::accept);
+
+
+        // 쓰레드를 사용한 메시지 병렬 전송
+        channelService.getOnlineParticipantIds(channelId).stream()
+                .filter(participantId -> !participantId.equals(senderUserId))
                 .forEach(participantId -> {
-                    if (channelService.isOnline(participantId, channelId)) {
+                    CompletableFuture.runAsync(() -> {
                         messageSender.accept(participantId);
-                    }
+                    }, senderThreadPool);
                 });
     }
 }

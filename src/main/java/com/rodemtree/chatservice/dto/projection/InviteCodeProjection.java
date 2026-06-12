@@ -2,5 +2,5 @@ package com.rodemtree.chatservice.dto.projection;
 
 public interface InviteCodeProjection {
 
-    String getConnectionInviteCode();
+    String getInviteCode();
 }

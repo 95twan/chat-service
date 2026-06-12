@@ -14,7 +14,13 @@ import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -32,17 +38,25 @@ public class SessionService {
         return authentication.getName();
     }
 
-    public boolean isOnline(UserId userId, ChannelId channelId) {
-        String channelIdKey = buildChannelIdKey(userId);
+    public List<UserId> getOnlineParticipants(ChannelId channelId, List<UserId> userIds) {
+        List<String> channelIdKeys = userIds.stream().map(this::buildChannelIdKey).toList();
         try {
-            String activeChannelId = stringRedisTemplate.opsForValue().get(channelIdKey);
-            if (activeChannelId != null && activeChannelId.equals(channelId.id().toString())) {
-                return true;
+            List<String> channelIds = stringRedisTemplate.opsForValue().multiGet(channelIdKeys);
+            if (channelIds != null) {
+                List<UserId> onlineParticipants = new ArrayList<>(channelIds.size());
+                String chId = channelId.id().toString();
+                for (int i = 0; i < userIds.size(); i++) {
+                    String value = channelIds.get(i);
+                    if (value != null && value.equals(chId)) {
+                        onlineParticipants.add(userIds.get(i));
+                    }
+                }
+                return onlineParticipants;
             }
         } catch (Exception ex) {
-            log.error("Redis get failed. key: {}, cause: {}", channelIdKey, ex.getMessage());
+            log.error("Redis get failed. key: {}, cause: {}", channelIdKeys, ex.getMessage());
         }
-        return false;
+        return Collections.emptyList();
     }
 
     public boolean setActiveChannel(UserId userId, ChannelId channelId) {
@@ -71,6 +85,6 @@ public class SessionService {
 
     private String buildChannelIdKey(UserId userId) {
         String NAMESPACE = "message:user";
-        return "%s:%d:%s".formatted(NAMESPACE, userId.id(), IdKey.CHANNEL_ID);
+        return "%s:%d:%s".formatted(NAMESPACE, userId.id(), IdKey.CHANNEL_ID.getValue());
     }
 }
