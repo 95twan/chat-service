@@ -16,7 +16,7 @@ public class CreateChannelRequest extends BaseRequest {
     @JsonCreator
     public CreateChannelRequest(
             @JsonProperty("title") String title,
-            @JsonProperty("participantUsername") List<String> participantUsernames
+            @JsonProperty("participantUsernames") List<String> participantUsernames
     ) {
         super(MessageType.CREATE_CHANNEL_REQUEST);
         this.title = title;

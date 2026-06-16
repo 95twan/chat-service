@@ -12,6 +12,7 @@ import com.rodemtree.chatservice.entity.ChannelEntity;
 import com.rodemtree.chatservice.entity.UserChannelEntity;
 import com.rodemtree.chatservice.repository.ChannelRepository;
 import com.rodemtree.chatservice.repository.UserChannelRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,21 @@ public class ChannelService {
                 .toList();
     }
 
+    public Optional<Channel> getChannel(InviteCode inviteCode) {
+        return channelRepository.findChannelByInviteCode(inviteCode.code())
+                .map(projection -> new Channel(new ChannelId(projection.getChannelId()), projection.getTitle(), projection.getHeadCount()));
+    }
+
     public List<UserId> getOnlineParticipantIds(ChannelId channelId) {
         return sessionService.getOnlineParticipants(channelId, getParticipantIds(channelId));
+    }
+
+    public List<Channel> getChannels(UserId userId) {
+        return userChannelRepository.findChannelsByUserId(userId.id()).stream()
+                .map(projection ->
+                        new Channel(new ChannelId(projection.getChannelId()), projection.getTitle(), projection.getHeadCount())
+                )
+                .toList();
     }
 
     @Transactional
@@ -94,6 +108,32 @@ public class ChannelService {
         }
     }
 
+    @Transactional
+    public Pair<Optional<Channel>, ResultType> joinChannel(InviteCode inviteCode, UserId userId) {
+        Optional<Channel> ch = getChannel(inviteCode);
+        if (ch.isEmpty()) {
+            return Pair.of(Optional.empty(), ResultType.NOT_FOUND);
+        }
+
+        Channel channel = ch.get();
+
+        if (isJoined(userId, channel.channelId())) {
+            return Pair.of(Optional.empty(), ResultType.ALREADY_JOINED);
+        } else if (channel.headCount() >= LIMIT_HEAD_COUNT) {
+            return Pair.of(Optional.empty(), ResultType.OVER_LIMIT);
+        }
+
+        ChannelEntity channelEntity = channelRepository.findChannelForUpdateByChannelId(channel.channelId().id())
+                .orElseThrow(() -> new EntityNotFoundException("Invalid channelId: " + channel.channelId().id()));
+
+        if (channelEntity.getHeadCount() < LIMIT_HEAD_COUNT) {
+            channelEntity.setHeadCount(channelEntity.getHeadCount() + 1);
+            userChannelRepository.save(new UserChannelEntity(userId.id(), channelEntity.getChannelId(), 0L));
+        }
+
+        return Pair.of(Optional.of(channel), ResultType.SUCCESS);
+    }
+
     public Pair<Optional<String>, ResultType> enterChannel(UserId userId, ChannelId channelId) {
         if (!isJoined(userId, channelId)) {
             log.warn("Enter channel failed. User not joined the channel. userId: {}, channelId: {}", userId.id(), channelId.id());
@@ -112,5 +152,28 @@ public class ChannelService {
 
         log.error("Enter channel failed. userId: {}, channelId: {}", userId.id(), channelId.id());
         return Pair.of(Optional.empty(), ResultType.FAILED);
+    }
+
+    public boolean leaveChannel(UserId userId) {
+        return sessionService.removeActiveChannel(userId);
+    }
+
+    @Transactional
+    public ResultType quitChannel(UserId userId, ChannelId channelId) {
+        if (!isJoined(userId, channelId)) {
+            return ResultType.NOT_JOINED;
+        }
+
+        ChannelEntity channelEntity = channelRepository.findChannelForUpdateByChannelId(channelId.id())
+                        .orElseThrow(() -> new EntityNotFoundException("Invalid channelId " + channelId.id()));
+
+        if (channelEntity.getHeadCount() > 0) {
+            channelEntity.setHeadCount(channelEntity.getHeadCount() - 1);
+        } else {
+            log.error("Count is already zero. channelId: {}, userId: {}", channelId.id(), userId.id());
+        }
+
+        userChannelRepository.deleteByUserIdAndChannelId(userId.id(), channelId.id());
+        return ResultType.SUCCESS;
     }
 }

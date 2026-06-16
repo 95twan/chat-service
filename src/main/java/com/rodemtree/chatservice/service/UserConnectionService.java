@@ -32,6 +32,7 @@ public class UserConnectionService {
     private final UserConnectionRepository userConnectionRepository;
 
 
+    @Transactional(readOnly = true)
     public List<Connection> getConnectionsByStatus(UserId userId, UserConnectionStatus status) {
         List<UserIdUsernameInviterUserIdProjection> userA = userConnectionRepository.findConnectionsByPartnerAUserIdAndStatus(userId.id(), status);
         List<UserIdUsernameInviterUserIdProjection> userB = userConnectionRepository.findConnectionsByPartnerBUserIdAndStatus(userId.id(), status);
@@ -52,6 +53,7 @@ public class UserConnectionService {
                 .orElse(UserConnectionStatus.NONE);
     }
 
+    @Transactional(readOnly = true)
     public long countConnectionStatus(UserId senderUserId, List<UserId> partnerUserIds, UserConnectionStatus status) {
         List<Long> ids = partnerUserIds.stream().map(UserId::id).toList();
         return userConnectionRepository.countByPartnerAUserIdAndPartnerBUserIdInAndStatus(senderUserId.id(), ids, status) + userConnectionRepository.countByPartnerBUserIdAndPartnerAUserIdInAndStatus(senderUserId.id(), ids, status);

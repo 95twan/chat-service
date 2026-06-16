@@ -8,8 +8,6 @@ import com.rodemtree.chatservice.dto.websocket.outbound.FetchConnectionsResponse
 import com.rodemtree.chatservice.service.UserConnectionService;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -18,9 +16,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class FetchConnectionsRequestHandler implements BaseRequestHandler<FetchConnectionsRequest> {
-
-
-    private static final Logger log = LoggerFactory.getLogger(FetchConnectionsRequestHandler.class);
 
     private final UserConnectionService userConnectionService;
     private final WebSocketSessionManager webSocketSessionManager;
