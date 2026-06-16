@@ -2,11 +2,13 @@ package com.rodemtree.chatservice.dto.websocket.inbound;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.rodemtree.chatservice.constant.MessageType;
+import lombok.Getter;
 
-public class KeepAliveRequest extends BaseRequest {
+@Getter
+public class FetchChannelsRequest extends BaseRequest {
 
     @JsonCreator
-    public KeepAliveRequest() {
-        super(MessageType.KEEP_ALIVE);
+    public FetchChannelsRequest() {
+        super(MessageType.FETCH_CHANNELS_REQUEST);
     }
 }

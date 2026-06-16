@@ -3,27 +3,22 @@ package com.rodemtree.chatservice.dto.websocket.inbound;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rodemtree.chatservice.constant.MessageType;
+import com.rodemtree.chatservice.dto.domain.ChannelId;
+import lombok.Getter;
 
-public class MessageRequest extends BaseRequest {
+@Getter
+public class WriteMessage extends BaseRequest {
 
-    private final String username;
+    private final ChannelId channelId;
     private final String content;
 
     @JsonCreator
-    public MessageRequest(
-            @JsonProperty("username") String username,
+    public WriteMessage(
+            @JsonProperty("channelId") ChannelId channelId,
             @JsonProperty("content") String content
     ) {
-        super(MessageType.MESSAGE);
-        this.username = username;
+        super(MessageType.WRITE_MESSAGE);
+        this.channelId = channelId;
         this.content = content;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getContent() {
-        return content;
     }
 }

@@ -1,6 +1,7 @@
 package com.rodemtree.chatservice.auth;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
+import com.rodemtree.chatservice.dto.domain.UserId;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,8 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
@@ -26,17 +29,26 @@ public class WebSocketHttpSessionHandshakeInterceptor extends HttpSessionHandsha
             @NonNull ServerHttpResponse response,
             @NonNull WebSocketHandler wsHandler,
             @NonNull Map<String, Object> attributes
-    ) throws Exception {
+    ) {
         if (request instanceof ServletServerHttpRequest servletServerHttpRequest) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) {
+                log.warn("WebSocket handshake failed. Authentication is null");
+                response.setStatusCode(HttpStatus.UNAUTHORIZED);
+                return false;
+            }
+
             HttpSession httpSession = servletServerHttpRequest.getServletRequest().getSession(false);
-            if (httpSession != null) {
-                attributes.put(Constants.HTTP_SESSION_ID.getValue(), httpSession.getId());
-                return true;
-            } else {
+            if (httpSession == null) {
                 log.info("WebSocket handshake failed. HTTP session is null");
                 response.setStatusCode(HttpStatus.UNAUTHORIZED);
                 return false;
             }
+
+            ChatUserDetails chatUserDetails = (ChatUserDetails) authentication.getPrincipal();
+            attributes.put(IdKey.HTTP_SESSION_ID.getValue(), httpSession.getId());
+            attributes.put(IdKey.USER_ID.getValue(), new UserId(chatUserDetails.getUserId()));
+            return true;
         } else {
             log.info("WebSocket handshake failed. request is {}", request.getClass());
             response.setStatusCode(HttpStatus.BAD_REQUEST);
