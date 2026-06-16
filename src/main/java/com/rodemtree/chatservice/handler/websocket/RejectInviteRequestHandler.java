@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.handler.websocket;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.constant.UserConnectionStatus;
 import com.rodemtree.chatservice.dto.domain.UserId;
@@ -28,7 +28,7 @@ public class RejectInviteRequestHandler implements BaseRequestHandler<RejectInvi
 
     @Override
     public void handle(WebSocketSession senderSession, RejectInviteRequest request) {
-        UserId rejectorUserId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+        UserId rejectorUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
         Pair<Boolean, String> result = userConnectionService.rejectInvite(rejectorUserId, request.getUsername());
 
         if (result.getFirst()) {

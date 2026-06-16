@@ -4,7 +4,6 @@ import com.rodemtree.chatservice.dto.domain.InviteCode;
 import com.rodemtree.chatservice.dto.domain.User;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.projection.ConnectionCountProjection;
-import com.rodemtree.chatservice.dto.projection.InviteCodeProjection;
 import com.rodemtree.chatservice.dto.projection.UsernameProjection;
 import com.rodemtree.chatservice.entity.UserEntity;
 import com.rodemtree.chatservice.repository.UserRepository;
@@ -15,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,14 +37,20 @@ public class UserService {
                 .map(entity -> new UserId(entity.getUserId()));
     }
 
+    public List<UserId> getUserIds(List<String> usernames) {
+        return userRepository.findUserIdsByUsernameIn(usernames).stream()
+                .map(userId -> new UserId(userId.getUserId()))
+                .toList();
+    }
+
     public Optional<User> getUser(InviteCode inviteCode) {
-        return userRepository.findByConnectionInviteCode(inviteCode.code())
+        return userRepository.findByInviteCode(inviteCode.code())
                 .map(entity -> new User(new UserId(entity.getUserId()), entity.getUsername()));
     }
 
     public Optional<InviteCode> getInviteCode(UserId userId) {
         return userRepository.findInviteCodeByUserId(userId.id())
-                .map(inviteCode -> new InviteCode(inviteCode.getConnectionInviteCode()));
+                .map(inviteCode -> new InviteCode(inviteCode.getInviteCode()));
     }
 
     public Optional<Integer> getConnectionCount(UserId userId) {

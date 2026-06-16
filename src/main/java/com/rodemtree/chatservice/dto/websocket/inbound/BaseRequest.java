@@ -14,8 +14,15 @@ import lombok.Getter;
         @JsonSubTypes.Type(value = AcceptInviteRequest.class, name = MessageType.ACCEPT_INVITE_REQUEST),
         @JsonSubTypes.Type(value = RejectInviteRequest.class, name = MessageType.REJECT_INVITE_REQUEST),
         @JsonSubTypes.Type(value = DisconnectRequest.class, name = MessageType.DISCONNECT_REQUEST),
-        @JsonSubTypes.Type(value = WriteMessageRequest.class, name = MessageType.WRITE_MESSAGE),
-        @JsonSubTypes.Type(value = KeepAliveRequest.class, name = MessageType.KEEP_ALIVE)
+        @JsonSubTypes.Type(value = FetchChannelInviteCodeRequest.class, name = MessageType.FETCH_CHANNEL_INVITE_CODE_REQUEST),
+        @JsonSubTypes.Type(value = FetchChannelsRequest.class, name = MessageType.FETCH_CHANNELS_REQUEST),
+        @JsonSubTypes.Type(value = CreateChannelRequest.class, name = MessageType.CREATE_CHANNEL_REQUEST),
+        @JsonSubTypes.Type(value = EnterChannelRequest.class, name = MessageType.ENTER_CHANNEL_REQUEST),
+        @JsonSubTypes.Type(value = JoinChannelRequest.class, name = MessageType.JOIN_CHANNEL_REQUEST),
+        @JsonSubTypes.Type(value = LeaveChannelRequest.class, name = MessageType.LEAVE_CHANNEL_REQUEST),
+        @JsonSubTypes.Type(value = QuitChannelRequest.class, name = MessageType.QUIT_CHANNEL_REQUEST),
+        @JsonSubTypes.Type(value = WriteMessage.class, name = MessageType.WRITE_MESSAGE),
+        @JsonSubTypes.Type(value = KeepAlive.class, name = MessageType.KEEP_ALIVE)
 })
 public abstract class BaseRequest {
     private final String type;

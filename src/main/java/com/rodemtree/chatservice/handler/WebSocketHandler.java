@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.handler;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.BaseRequest;
 import com.rodemtree.chatservice.handler.websocket.RequestDispatcher;
@@ -32,21 +32,21 @@ public class WebSocketHandler extends TextWebSocketHandler {
         log.info("Connection established: {}", session.getId());
 
         ConcurrentWebSocketSessionDecorator concurrentWebSocketSessionDecorator = new ConcurrentWebSocketSessionDecorator(session, 5000, 100 * 1024);
-        UserId userId = (UserId) session.getAttributes().get(Constants.USER_ID.getValue());
+        UserId userId = (UserId) session.getAttributes().get(IdKey.USER_ID.getValue());
         webSocketSessionManager.putSession(userId, concurrentWebSocketSessionDecorator);
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
         log.error("Transport error: [{}] from {}", exception.getMessage(), session.getId());
-        UserId userId = (UserId) session.getAttributes().get(Constants.USER_ID.getValue());
+        UserId userId = (UserId) session.getAttributes().get(IdKey.USER_ID.getValue());
         webSocketSessionManager.closeSession(userId);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, @NonNull CloseStatus status) {
         log.info("Connection closed: [{}] from {}", status, session.getId());
-        UserId userId = (UserId) session.getAttributes().get(Constants.USER_ID.getValue());
+        UserId userId = (UserId) session.getAttributes().get(IdKey.USER_ID.getValue());
         webSocketSessionManager.closeSession(userId);
     }
 

@@ -15,8 +15,8 @@ public class MessageEntity extends BaseEntity {
     @Column(name = "message_sequence")
     private Long messageSequence;
 
-    @Column(name = "user_name", nullable = false)
-    private String username;
+    @Column(name = "sender_user_id", nullable = false)
+    private Long senderUserId;
 
     @Column(name = "content", nullable = false)
     private String content;
@@ -25,8 +25,8 @@ public class MessageEntity extends BaseEntity {
     public MessageEntity() {
     }
 
-    public MessageEntity(String username, String content) {
-        this.username = username;
+    public MessageEntity(Long senderUserId, String content) {
+        this.senderUserId = senderUserId;
         this.content = content;
     }
 
@@ -44,7 +44,7 @@ public class MessageEntity extends BaseEntity {
 
     @Override
     public String toString() {
-        return "MessageEntity{messageSequence=%d, username='%s', content='%s', createdAt=%s, updatedAt=%s}"
-                .formatted(messageSequence, username, content, getCreatedAt(), getUpdatedAt());
+        return "MessageEntity{messageSequence=%d, senderUserId=%d, content='%s', createdAt=%s, updatedAt=%s}"
+                .formatted(messageSequence, senderUserId, content, getCreatedAt(), getUpdatedAt());
     }
 }

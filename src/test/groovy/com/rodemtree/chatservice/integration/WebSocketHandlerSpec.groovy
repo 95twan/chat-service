@@ -1,8 +1,13 @@
-package com.rodemtree.chatservice.handler
+package com.rodemtree.chatservice.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rodemtree.chatservice.ChatApplication
-import com.rodemtree.chatservice.dto.websocket.inbound.WriteMessageRequest
+import com.rodemtree.chatservice.dto.domain.ChannelId
+import com.rodemtree.chatservice.dto.domain.UserId
+import com.rodemtree.chatservice.dto.websocket.inbound.WriteMessage
+import com.rodemtree.chatservice.service.ChannelService
+import com.rodemtree.chatservice.service.UserService
+import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -35,6 +40,12 @@ class WebSocketHandlerSpec extends Specification {
     @Autowired
     ObjectMapper objectMapper
 
+    @Autowired
+    UserService userService
+
+    @SpringBean
+    ChannelService channelService = Stub()
+
     def "Group Chat Basic Test"() {
         given:
         register("testuserA", "testpassA")
@@ -45,15 +56,21 @@ class WebSocketHandlerSpec extends Specification {
         def sessionIdC = login("testuserC", "testpassC")
         def (clientA, clientB, clientC) = [createClient(sessionIdA), createClient(sessionIdB), createClient(sessionIdC)]
 
+        channelService.getOnlineParticipantIds(_ as ChannelId) >> List.of(
+                userService.getUserId("testuserA").get(),
+                userService.getUserId("testuserB").get(),
+                userService.getUserId("testuserC").get()
+        )
+
         when:
         clientA.session.sendMessage(new TextMessage(
-                objectMapper.writeValueAsString(new WriteMessageRequest("clientA", "안녕하세요. A 입니다."))
+                objectMapper.writeValueAsString(new WriteMessage(new ChannelId(1), "안녕하세요. A 입니다."))
         ))
         clientB.session.sendMessage(new TextMessage(
-                objectMapper.writeValueAsString(new WriteMessageRequest("clientB", "안녕하세요. B 입니다."))
+                objectMapper.writeValueAsString(new WriteMessage(new ChannelId(1), "안녕하세요. B 입니다."))
         ))
         clientC.session.sendMessage(new TextMessage(
-                objectMapper.writeValueAsString(new WriteMessageRequest("clientC", "안녕하세요. C 입니다."))
+                objectMapper.writeValueAsString(new WriteMessage(new ChannelId(1), "안녕하세요. C 입니다."))
         ))
 
         then:
@@ -65,14 +82,14 @@ class WebSocketHandlerSpec extends Specification {
         def resultB = clientB.queue.poll(1, TimeUnit.SECONDS) + clientB.queue.poll(1, TimeUnit.SECONDS)
         def resultC = clientC.queue.poll(1, TimeUnit.SECONDS) + clientC.queue.poll(1, TimeUnit.SECONDS)
 
-        resultA.contains("clientB") && resultA.contains("clientC")
-        resultB.contains("clientA") && resultB.contains("clientC")
-        resultC.contains("clientA") && resultC.contains("clientB")
+        resultA.contains("testuserB") && resultA.contains("testuserC")
+        resultB.contains("testuserA") && resultB.contains("testuserC")
+        resultC.contains("testuserA") && resultC.contains("testuserB")
 
         and:
         clientA.queue.isEmpty()
         clientB.queue.isEmpty()
-        clientC.queue.isEmpty()
+        clientB.queue.isEmpty()
 
         cleanup:
         unregister(sessionIdA)

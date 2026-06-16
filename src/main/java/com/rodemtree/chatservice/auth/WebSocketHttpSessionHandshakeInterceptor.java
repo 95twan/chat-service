@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.auth;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -46,8 +46,8 @@ public class WebSocketHttpSessionHandshakeInterceptor extends HttpSessionHandsha
             }
 
             ChatUserDetails chatUserDetails = (ChatUserDetails) authentication.getPrincipal();
-            attributes.put(Constants.HTTP_SESSION_ID.getValue(), httpSession.getId());
-            attributes.put(Constants.USER_ID.getValue(), new UserId(chatUserDetails.getUserId()));
+            attributes.put(IdKey.HTTP_SESSION_ID.getValue(), httpSession.getId());
+            attributes.put(IdKey.USER_ID.getValue(), new UserId(chatUserDetails.getUserId()));
             return true;
         } else {
             log.info("WebSocket handshake failed. request is {}", request.getClass());

@@ -13,11 +13,26 @@ public class MessageType {
     public static final String REJECT_INVITE_RESPONSE = "REJECT_INVITE_RESPONSE";
     public static final String DISCONNECT_REQUEST = "DISCONNECT_REQUEST";
     public static final String DISCONNECT_RESPONSE = "DISCONNECT_RESPONSE";
+    public static final String FETCH_CHANNEL_INVITE_CODE_REQUEST = "FETCH_CHANNEL_INVITE_CODE_REQUEST";
+    public static final String FETCH_CHANNEL_INVITE_CODE_RESPONSE = "FETCH_CHANNEL_INVITE_CODE_RESPONSE";
+    public static final String FETCH_CHANNELS_REQUEST = "FETCH_CHANNELS_REQUEST";
+    public static final String FETCH_CHANNELS_RESPONSE = "FETCH_CHANNELS_RESPONSE";
+    public static final String CREATE_CHANNEL_REQUEST = "CREATE_CHANNEL_REQUEST";
+    public static final String CREATE_CHANNEL_RESPONSE = "CREATE_CHANNEL_RESPONSE";
+    public static final String ENTER_CHANNEL_REQUEST = "ENTER_CHANNEL_REQUEST";
+    public static final String ENTER_CHANNEL_RESPONSE = "ENTER_CHANNEL_RESPONSE";
+    public static final String JOIN_CHANNEL_REQUEST = "JOIN_CHANNEL_REQUEST";
+    public static final String JOIN_CHANNEL_RESPONSE = "JOIN_CHANNEL_RESPONSE";
+    public static final String LEAVE_CHANNEL_REQUEST = "LEAVE_CHANNEL_REQUEST";
+    public static final String LEAVE_CHANNEL_RESPONSE = "LEAVE_CHANNEL_RESPONSE";
+    public static final String QUIT_CHANNEL_REQUEST = "QUIT_CHANNEL_REQUEST";
+    public static final String QUIT_CHANNEL_RESPONSE = "QUIT_CHANNEL_RESPONSE";
     public static final String WRITE_MESSAGE = "WRITE_MESSAGE";
 
     // Notification
     public static final String ASK_INVITE = "ASK_INVITE";
     public static final String NOTIFY_ACCEPT_INVITE = "NOTIFY_ACCEPT_INVITE";
+    public static final String NOTIFY_JOIN_CHANNEL = "NOTIFY_JOIN_CHANNEL";
     public static final String NOTIFY_MESSAGE = "NOTIFY_MESSAGE";
     public static final String KEEP_ALIVE = "KEEP_ALIVE";
     public static final String ERROR = "ERROR";

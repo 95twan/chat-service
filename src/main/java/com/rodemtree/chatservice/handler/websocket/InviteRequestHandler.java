@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.handler.websocket;
 
-import com.rodemtree.chatservice.constant.Constants;
+import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.constant.UserConnectionStatus;
 import com.rodemtree.chatservice.dto.domain.UserId;
@@ -32,7 +32,7 @@ public class InviteRequestHandler implements BaseRequestHandler<InviteRequest> {
 
     @Override
     public void handle(WebSocketSession senderSession, InviteRequest request) {
-        UserId inviterUserId = (UserId) senderSession.getAttributes().get(Constants.USER_ID.getValue());
+        UserId inviterUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
         Pair<Optional<UserId>, String> result = userConnectionService.invite(inviterUserId, request.getUserInviteCode());
         result.getFirst().ifPresentOrElse(partnerUserId -> {
             String inviterUsername = result.getSecond();
