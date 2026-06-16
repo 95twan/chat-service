@@ -9,7 +9,7 @@ import com.rodemtree.chatservice.dto.websocket.inbound.JoinChannelRequest;
 import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.JoinChannelResponse;
 import com.rodemtree.chatservice.service.ChannelService;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
+import com.rodemtree.chatservice.service.ClientNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class JoinChannelRequestHandler implements BaseRequestHandler<JoinChannel
     private static final Logger log = LoggerFactory.getLogger(JoinChannelRequestHandler.class);
 
     private final ChannelService channelService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final ClientNotificationService clientNotificationService;
 
 
     @Override
@@ -40,15 +40,15 @@ public class JoinChannelRequestHandler implements BaseRequestHandler<JoinChannel
             result = channelService.joinChannel(request.getInviteCode(), joinUserId);
         } catch (Exception ex) {
             log.error("Join channel failed. cause: {}", ex.getMessage());
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.JOIN_CHANNEL_REQUEST, ResultType.FAILED.getMessage()));
+            clientNotificationService.sendMessage(senderSession, joinUserId, new ErrorResponse(MessageType.JOIN_CHANNEL_REQUEST, ResultType.FAILED.getMessage()));
             return;
         }
 
         result.getFirst().ifPresentOrElse(channel -> {
-            webSocketSessionManager.sendMessage(senderSession, new JoinChannelResponse(channel.channelId(), channel.title()));
+            clientNotificationService.sendMessage(senderSession, joinUserId, new JoinChannelResponse(channel.channelId(), channel.title()));
         }, () -> {
             String errorMessage = result.getSecond().getMessage();
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.JOIN_CHANNEL_REQUEST, errorMessage));
+            clientNotificationService.sendMessage(senderSession, joinUserId, new ErrorResponse(MessageType.JOIN_CHANNEL_REQUEST, errorMessage));
         });
     }
 }

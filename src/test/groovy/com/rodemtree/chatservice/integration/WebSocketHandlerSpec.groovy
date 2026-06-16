@@ -56,7 +56,13 @@ class WebSocketHandlerSpec extends Specification {
         def sessionIdC = login("testuserC", "testpassC")
         def (clientA, clientB, clientC) = [createClient(sessionIdA), createClient(sessionIdB), createClient(sessionIdC)]
 
-        channelService.getOnlineParticipantIds(_ as ChannelId) >> List.of(
+        channelService.getParticipantIds(_ as ChannelId) >> List.of(
+                userService.getUserId("testuserA").get(),
+                userService.getUserId("testuserB").get(),
+                userService.getUserId("testuserC").get()
+        )
+
+        channelService.getOnlineParticipantIds(_ as ChannelId, _ as List<UserId>) >> List.of(
                 userService.getUserId("testuserA").get(),
                 userService.getUserId("testuserB").get(),
                 userService.getUserId("testuserC").get()

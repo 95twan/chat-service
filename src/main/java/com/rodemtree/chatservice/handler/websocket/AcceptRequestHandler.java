@@ -7,8 +7,8 @@ import com.rodemtree.chatservice.dto.websocket.inbound.AcceptInviteRequest;
 import com.rodemtree.chatservice.dto.websocket.outbound.AcceptInviteNotification;
 import com.rodemtree.chatservice.dto.websocket.outbound.AcceptInviteResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
+import com.rodemtree.chatservice.service.ClientNotificationService;
 import com.rodemtree.chatservice.service.UserConnectionService;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class AcceptRequestHandler implements BaseRequestHandler<AcceptInviteRequ
     private static final Logger log = LoggerFactory.getLogger(AcceptRequestHandler.class);
 
     private final UserConnectionService userConnectionService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final ClientNotificationService clientNotificationService;
 
 
     @Override
@@ -34,14 +34,13 @@ public class AcceptRequestHandler implements BaseRequestHandler<AcceptInviteRequ
         Pair<Optional<UserId>, String> result = userConnectionService.acceptInvite(acceptorUserId, request.getUsername());
 
         result.getFirst().ifPresentOrElse(inviterUserId -> {
-            webSocketSessionManager.sendMessage(senderSession, new AcceptInviteResponse(request.getUsername()));
+            clientNotificationService.sendMessage(senderSession, acceptorUserId, new AcceptInviteResponse(request.getUsername()));
             String acceptorUsername = result.getSecond();
-            webSocketSessionManager.sendMessage(
-                    webSocketSessionManager.getSession(inviterUserId), new AcceptInviteNotification(acceptorUsername)
+            clientNotificationService.sendMessage(inviterUserId, new AcceptInviteNotification(acceptorUsername)
             );
         }, () -> {
             String errorMessage = result.getSecond();
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.ACCEPT_INVITE_REQUEST, errorMessage));
+            clientNotificationService.sendMessage(senderSession, acceptorUserId, new ErrorResponse(MessageType.ACCEPT_INVITE_REQUEST, errorMessage));
         });
     }
 }

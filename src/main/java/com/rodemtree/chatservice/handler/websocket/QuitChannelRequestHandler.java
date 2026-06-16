@@ -8,7 +8,7 @@ import com.rodemtree.chatservice.dto.websocket.inbound.QuitChannelRequest;
 import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.QuitChannelResponse;
 import com.rodemtree.chatservice.service.ChannelService;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
+import com.rodemtree.chatservice.service.ClientNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class QuitChannelRequestHandler implements BaseRequestHandler<QuitChannel
     private static final Logger log = LoggerFactory.getLogger(QuitChannelRequestHandler.class);
 
     private final ChannelService channelService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final ClientNotificationService clientNotificationService;
 
 
     @Override
@@ -35,14 +35,14 @@ public class QuitChannelRequestHandler implements BaseRequestHandler<QuitChannel
         try {
             result = channelService.quitChannel(quitUserId, request.getChannelId());
         } catch (Exception ex) {
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.QUIT_CHANNEL_REQUEST, ResultType.FAILED.getMessage()));
+            clientNotificationService.sendMessage(senderSession, quitUserId, new ErrorResponse(MessageType.QUIT_CHANNEL_REQUEST, ResultType.FAILED.getMessage()));
             return;
         }
 
         if (result == ResultType.SUCCESS) {
-            webSocketSessionManager.sendMessage(senderSession, new QuitChannelResponse(request.getChannelId()));
+            clientNotificationService.sendMessage(senderSession, quitUserId, new QuitChannelResponse(request.getChannelId()));
         } else {
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.QUIT_CHANNEL_REQUEST, result.getMessage()));
+            clientNotificationService.sendMessage(senderSession, quitUserId, new ErrorResponse(MessageType.QUIT_CHANNEL_REQUEST, result.getMessage()));
         }
     }
 }
