@@ -10,9 +10,8 @@ import com.rodemtree.chatservice.dto.websocket.outbound.CreateChannelResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.JoinChannelNotification;
 import com.rodemtree.chatservice.service.ChannelService;
-import com.rodemtree.chatservice.service.SessionService;
+import com.rodemtree.chatservice.service.ClientNotificationService;
 import com.rodemtree.chatservice.service.UserService;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ public class CreateChannelRequestHandler implements BaseRequestHandler<CreateCha
 
     private final ChannelService channelService;
     private final UserService userService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final ClientNotificationService clientNotificationService;
 
     @Override
     public void handle(WebSocketSession senderSession, CreateChannelRequest request) {
@@ -42,7 +41,7 @@ public class CreateChannelRequestHandler implements BaseRequestHandler<CreateCha
         List<UserId> participantIds = userService.getUserIds(request.getParticipantUsernames());
 
         if (participantIds.isEmpty()) {
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST, ResultType.NOT_FOUND.getMessage()));
+            clientNotificationService.sendMessage(senderSession, creatorUserId, new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST, ResultType.NOT_FOUND.getMessage()));
             return;
         }
 
@@ -50,27 +49,24 @@ public class CreateChannelRequestHandler implements BaseRequestHandler<CreateCha
         try {
             result = channelService.createChannel(creatorUserId, participantIds, request.getTitle());
         } catch (Exception ex) {
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST, ResultType.FAILED.getMessage()));
+            clientNotificationService.sendMessage(senderSession, creatorUserId, new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST, ResultType.FAILED.getMessage()));
             return;
         }
 
         if (result.getFirst().isEmpty()) {
             String errorMessage = result.getSecond().getMessage();
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST, errorMessage));
+            clientNotificationService.sendMessage(senderSession, creatorUserId, new ErrorResponse(MessageType.CREATE_CHANNEL_REQUEST, errorMessage));
             return;
         }
 
         Channel channel = result.getFirst().get();
 
-        webSocketSessionManager.sendMessage(senderSession, new CreateChannelResponse(channel.channelId(), channel.title()));
+        clientNotificationService.sendMessage(senderSession, creatorUserId, new CreateChannelResponse(channel.channelId(), channel.title()));
 
         participantIds.forEach(partnerUserId ->
-                CompletableFuture.runAsync(() -> {
-                    WebSocketSession participantSession = webSocketSessionManager.getSession(partnerUserId);
-                    if (participantSession != null) {
-                        webSocketSessionManager.sendMessage(participantSession, new JoinChannelNotification(channel.channelId(), channel.title()));
-                    }
-                })
+                CompletableFuture.runAsync(() ->
+                        clientNotificationService.sendMessage(partnerUserId, new JoinChannelNotification(channel.channelId(), channel.title()))
+                )
         );
     }
 }

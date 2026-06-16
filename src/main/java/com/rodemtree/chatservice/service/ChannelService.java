@@ -7,7 +7,6 @@ import com.rodemtree.chatservice.dto.domain.ChannelId;
 import com.rodemtree.chatservice.dto.domain.InviteCode;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.projection.ChannelTitleProjection;
-import com.rodemtree.chatservice.dto.projection.InviteCodeProjection;
 import com.rodemtree.chatservice.entity.ChannelEntity;
 import com.rodemtree.chatservice.entity.UserChannelEntity;
 import com.rodemtree.chatservice.repository.ChannelRepository;
@@ -56,13 +55,13 @@ public class ChannelService {
                 .toList();
     }
 
+    public List<UserId> getOnlineParticipantIds(ChannelId channelId, List<UserId> userIds) {
+        return sessionService.getOnlineParticipants(channelId, userIds);
+    }
+
     public Optional<Channel> getChannel(InviteCode inviteCode) {
         return channelRepository.findChannelByInviteCode(inviteCode.code())
                 .map(projection -> new Channel(new ChannelId(projection.getChannelId()), projection.getTitle(), projection.getHeadCount()));
-    }
-
-    public List<UserId> getOnlineParticipantIds(ChannelId channelId) {
-        return sessionService.getOnlineParticipants(channelId, getParticipantIds(channelId));
     }
 
     public List<Channel> getChannels(UserId userId) {
@@ -165,7 +164,7 @@ public class ChannelService {
         }
 
         ChannelEntity channelEntity = channelRepository.findChannelForUpdateByChannelId(channelId.id())
-                        .orElseThrow(() -> new EntityNotFoundException("Invalid channelId " + channelId.id()));
+                .orElseThrow(() -> new EntityNotFoundException("Invalid channelId " + channelId.id()));
 
         if (channelEntity.getHeadCount() > 0) {
             channelEntity.setHeadCount(channelEntity.getHeadCount() - 1);

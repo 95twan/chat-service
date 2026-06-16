@@ -8,7 +8,7 @@ import com.rodemtree.chatservice.dto.websocket.inbound.EnterChannelRequest;
 import com.rodemtree.chatservice.dto.websocket.outbound.EnterChannelResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
 import com.rodemtree.chatservice.service.ChannelService;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
+import com.rodemtree.chatservice.service.ClientNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class EnterChannelRequestHandler implements BaseRequestHandler<EnterChann
     private static final Logger log = LoggerFactory.getLogger(EnterChannelRequestHandler.class);
 
     private final ChannelService channelService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final ClientNotificationService clientNotificationService;
 
 
     @Override
@@ -36,10 +36,10 @@ public class EnterChannelRequestHandler implements BaseRequestHandler<EnterChann
         Pair<Optional<String>, ResultType> result = channelService.enterChannel(enterUserId, request.getChannelId());
 
         result.getFirst().ifPresentOrElse(title -> {
-            webSocketSessionManager.sendMessage(senderSession, new EnterChannelResponse(request.getChannelId(), title));
+            clientNotificationService.sendMessage(senderSession, enterUserId, new EnterChannelResponse(request.getChannelId(), title));
         }, () -> {
             String errorMessage = result.getSecond().getMessage();
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.ENTER_CHANNEL_REQUEST, errorMessage));
+            clientNotificationService.sendMessage(senderSession, enterUserId, new ErrorResponse(MessageType.ENTER_CHANNEL_REQUEST, errorMessage));
         });
     }
 }

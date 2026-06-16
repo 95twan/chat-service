@@ -6,8 +6,8 @@ import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.FetchUserInviteCodeRequest;
 import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.FetchUserInviteCodeResponse;
+import com.rodemtree.chatservice.service.ClientNotificationService;
 import com.rodemtree.chatservice.service.UserService;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,17 +21,17 @@ public class FetchUserInviteCodeRequestHandler implements BaseRequestHandler<Fet
     private static final Logger log = LoggerFactory.getLogger(FetchUserInviteCodeRequestHandler.class);
 
     private final UserService userService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final ClientNotificationService clientNotificationService;
 
 
     @Override
     public void handle(WebSocketSession senderSession, FetchUserInviteCodeRequest request) {
-        UserId userId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
+        UserId senderUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
 
-        userService.getInviteCode(userId).ifPresentOrElse(inviteCode -> {
-            webSocketSessionManager.sendMessage(senderSession, new FetchUserInviteCodeResponse(inviteCode));
+        userService.getInviteCode(senderUserId).ifPresentOrElse(inviteCode -> {
+            clientNotificationService.sendMessage(senderSession, senderUserId, new FetchUserInviteCodeResponse(inviteCode));
         }, () -> {
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.FETCH_USER_INVITE_CODE_REQUEST, "Fetch user invite code failed."));
+            clientNotificationService.sendMessage(senderSession, senderUserId, new ErrorResponse(MessageType.FETCH_USER_INVITE_CODE_REQUEST, "Fetch user invite code failed."));
         });
     }
 }

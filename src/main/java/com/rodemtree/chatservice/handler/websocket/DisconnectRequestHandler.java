@@ -7,8 +7,8 @@ import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.DisconnectRequest;
 import com.rodemtree.chatservice.dto.websocket.outbound.DisconnectResponse;
 import com.rodemtree.chatservice.dto.websocket.outbound.ErrorResponse;
+import com.rodemtree.chatservice.service.ClientNotificationService;
 import com.rodemtree.chatservice.service.UserConnectionService;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,17 +23,17 @@ public class DisconnectRequestHandler implements BaseRequestHandler<DisconnectRe
     private static final Logger log = LoggerFactory.getLogger(DisconnectRequestHandler.class);
 
     private final UserConnectionService userConnectionService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final ClientNotificationService clientNotificationService;
 
     @Override
     public void handle(WebSocketSession senderSession, DisconnectRequest request) {
         UserId senderUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
         Pair<Boolean, String> result = userConnectionService.disconnect(senderUserId, request.getUsername());
         if (result.getFirst()) {
-            webSocketSessionManager.sendMessage(senderSession, new DisconnectResponse(request.getUsername(), UserConnectionStatus.DISCONNECTED));
+            clientNotificationService.sendMessage(senderSession, senderUserId, new DisconnectResponse(request.getUsername(), UserConnectionStatus.DISCONNECTED));
         } else {
             String errorMessage = result.getSecond();
-            webSocketSessionManager.sendMessage(senderSession, new ErrorResponse(MessageType.DISCONNECT_REQUEST, errorMessage));
+            clientNotificationService.sendMessage(senderSession, senderUserId, new ErrorResponse(MessageType.DISCONNECT_REQUEST, errorMessage));
         }
     }
 }

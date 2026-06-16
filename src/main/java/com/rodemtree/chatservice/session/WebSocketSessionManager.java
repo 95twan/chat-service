@@ -1,7 +1,6 @@
 package com.rodemtree.chatservice.session;
 
 import com.rodemtree.chatservice.dto.domain.UserId;
-import com.rodemtree.chatservice.dto.websocket.outbound.BaseMessage;
 import com.rodemtree.chatservice.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,14 +49,13 @@ public class WebSocketSessionManager {
         }
     }
 
-    public void sendMessage(WebSocketSession session, BaseMessage message) {
-        jsonUtil.toJson(message).ifPresent(msg -> {
-            try {
-                session.sendMessage(new TextMessage(msg));
-                log.info("Sent message: [{}] to {}", msg, session.getId());
-            } catch (Exception e) {
-                log.error("Failed to send message. cause: {}", e.getMessage());
-            }
-        });
+    public void sendMessage(WebSocketSession session, String message) throws IOException {
+        try {
+            session.sendMessage(new TextMessage(message));
+            log.info("Send message: [{}] to {}", message, session.getId());
+        } catch (IOException ex) {
+            log.error("Send message failed. cause: {}", ex.getMessage());
+            throw ex;
+        }
     }
 }

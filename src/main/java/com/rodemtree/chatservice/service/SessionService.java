@@ -17,10 +17,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -43,15 +40,13 @@ public class SessionService {
         try {
             List<String> channelIds = stringRedisTemplate.opsForValue().multiGet(channelIdKeys);
             if (channelIds != null) {
-                List<UserId> onlineParticipants = new ArrayList<>(channelIds.size());
+                List<UserId> onlineParticipantUserIds = new ArrayList<>(channelIds.size());
                 String chId = channelId.id().toString();
                 for (int i = 0; i < userIds.size(); i++) {
                     String value = channelIds.get(i);
-                    if (value != null && value.equals(chId)) {
-                        onlineParticipants.add(userIds.get(i));
-                    }
+                    onlineParticipantUserIds.add(value != null && value.equals(chId) ? userIds.get(i) : null);
                 }
-                return onlineParticipants;
+                return onlineParticipantUserIds;
             }
         } catch (Exception ex) {
             log.error("Redis get failed. key: {}, cause: {}", channelIdKeys, ex.getMessage());
