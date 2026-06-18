@@ -2,12 +2,22 @@ spring:
   application:
     name: chat-service
   datasource:
-    url: ${DB_URL}
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      pool-name: ConnectionPool
+    source:
+      jdbc-url: ${DB_SOURCE_URL}
+      username: ${MYSQL_USER}
+      password: ${MYSQL_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      pool-name: SourceConnectionPool
+      minimum-idle: 10
+      maximum-pool-size: 20
+      idle-timeout: 60000
+      connection-timeout: 30000
+    replica:
+      jdbc-url: ${DB_REPLICA_URL}
+      username: ${MYSQL_USER}
+      password: ${MYSQL_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      pool-name: ReplicaConnectionPool
       minimum-idle: 10
       maximum-pool-size: 20
       idle-timeout: 60000
@@ -32,5 +42,6 @@ spring:
 
 logging:
   level:
+    com.zaxxer.hikari: DEBUG
     org.springframework.security: DEBUG
     org.springframework.security.web.FilterChainProxy: TRACE

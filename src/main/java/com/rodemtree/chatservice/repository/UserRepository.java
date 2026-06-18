@@ -17,6 +17,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByUsername(@NonNull String username);
 
+    Optional<UserIdProjection> findUserIdByUsername(@NonNull String username);
+
     List<UserIdProjection> findUserIdsByUsernameIn(@NonNull Collection<String> usernames);
 
     Optional<UsernameProjection> findUsernameByUserId(@NonNull Long userId);
