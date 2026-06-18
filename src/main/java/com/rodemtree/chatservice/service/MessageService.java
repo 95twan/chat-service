@@ -11,6 +11,7 @@ import com.rodemtree.chatservice.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class MessageService {
         pushService.registerPushMessageType(MessageType.NOTIFY_MESSAGE);
     }
 
-
+    @Transactional
     public void sendMessage(UserId senderUserId, ChannelId channelId, String content, BaseMessage message) {
         Optional<String> json = jsonUtil.toJson(message);
         if (json.isEmpty()) {

@@ -5,6 +5,8 @@
 application-test.yaml
 
 docker/data/*
+docker/init-scripts-replica/*
+docker/init-scripts-source/*
 
 HELP.md
 .gradle
