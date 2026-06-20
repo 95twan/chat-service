@@ -1,5 +1,6 @@
 package com.rodemtree.chatservice.service;
 
+import com.rodemtree.chatservice.constant.KeyPrefix;
 import com.rodemtree.chatservice.constant.UserConnectionStatus;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.entity.UserConnectionEntity;
@@ -11,12 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 public class UserConnectionLimitService {
 
+    private final CacheService cacheService;
     private final UserRepository userRepository;
     private final UserConnectionRepository userConnectionRepository;
 
@@ -58,6 +61,16 @@ public class UserConnectionLimitService {
         firstUserEntity.setConnectionCount(firstConnectionCount + 1);
         secondUserEntity.setConnectionCount(secondConnectionCount + 1);
         userConnectionEntity.setStatus(UserConnectionStatus.ACCEPTED);
+
+        cacheService.delete(
+                List.of(
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, inviterUserId.id().toString(), UserConnectionStatus.PENDING.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, inviterUserId.id().toString(), UserConnectionStatus.ACCEPTED.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, acceptorUserId.id().toString(), UserConnectionStatus.PENDING.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, acceptorUserId.id().toString(), UserConnectionStatus.ACCEPTED.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTION_STATUS, String.valueOf(firstUserId), String.valueOf(secondUserId))
+                )
+        );
     }
 
     @Transactional
@@ -85,5 +98,15 @@ public class UserConnectionLimitService {
         firstUserEntity.setConnectionCount(firstConnectionCount - 1);
         secondUserEntity.setConnectionCount(secondConnectionCount - 1);
         userConnectionEntity.setStatus(UserConnectionStatus.DISCONNECTED);
+
+        cacheService.delete(
+                List.of(
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, senderUserId.id().toString(), UserConnectionStatus.ACCEPTED.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, senderUserId.id().toString(), UserConnectionStatus.DISCONNECTED.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, partnerUserId.id().toString(), UserConnectionStatus.ACCEPTED.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTIONS_STATUS, partnerUserId.id().toString(), UserConnectionStatus.DISCONNECTED.name()),
+                        cacheService.buildKey(KeyPrefix.CONNECTION_STATUS, String.valueOf(firstUserId), String.valueOf(secondUserId))
+                )
+        );
     }
 }
