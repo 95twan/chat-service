@@ -2,6 +2,7 @@ package com.rodemtree.chatservice.service;
 
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.dto.domain.UserId;
+import com.rodemtree.chatservice.dto.kafka.outbound.*;
 import com.rodemtree.chatservice.dto.websocket.outbound.BaseMessage;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import com.rodemtree.chatservice.util.JsonUtil;
@@ -28,16 +29,15 @@ public class ClientNotificationService {
         this.pushService = pushService;
         this.jsonUtil = jsonUtil;
 
-        pushService.registerPushMessageType(MessageType.INVITE_RESPONSE);
-        pushService.registerPushMessageType(MessageType.ASK_INVITE);
-        pushService.registerPushMessageType(MessageType.ACCEPT_INVITE_RESPONSE);
-        pushService.registerPushMessageType(MessageType.NOTIFY_ACCEPT_INVITE);
-        pushService.registerPushMessageType(MessageType.JOIN_CHANNEL_RESPONSE);
-        pushService.registerPushMessageType(MessageType.NOTIFY_JOIN_CHANNEL);
-        pushService.registerPushMessageType(MessageType.DISCONNECT_RESPONSE);
-        pushService.registerPushMessageType(MessageType.REJECT_INVITE_RESPONSE);
-        pushService.registerPushMessageType(MessageType.CREATE_CHANNEL_RESPONSE);
-        pushService.registerPushMessageType(MessageType.QUIT_CHANNEL_RESPONSE);
+        pushService.registerPushMessageType(MessageType.INVITE_RESPONSE, InviteResponseRecord.class);
+        pushService.registerPushMessageType(MessageType.ASK_INVITE, InviteNotificationRecord.class);
+        pushService.registerPushMessageType(MessageType.ACCEPT_INVITE_RESPONSE, AcceptInviteResponseRecord.class);
+        pushService.registerPushMessageType(MessageType.NOTIFY_ACCEPT_INVITE, AcceptInviteNotificationRecord.class);
+        pushService.registerPushMessageType(MessageType.NOTIFY_JOIN_CHANNEL, JoinChannelNotificationRecord.class);
+        pushService.registerPushMessageType(MessageType.DISCONNECT_RESPONSE, DisconnectResponseRecord.class);
+        pushService.registerPushMessageType(MessageType.REJECT_INVITE_RESPONSE, RejectInviteResponseRecord.class);
+        pushService.registerPushMessageType(MessageType.CREATE_CHANNEL_RESPONSE, CreateChannelResponseRecord.class);
+        pushService.registerPushMessageType(MessageType.QUIT_CHANNEL_RESPONSE, QuitChannelResponseRecord.class);
     }
 
     public void sendMessage(WebSocketSession session, UserId userId, BaseMessage message) {

@@ -39,9 +39,24 @@ spring:
       port: 6379
       repositories:
         enabled: false
+  kafka:
+    bootstrap-servers: ${KAFKA1_URL}, ${KAFKA2_URL}, ${KAFKA3_URL}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        delivery.timeout.ms: 10000
+        request.timeout.ms: 3000
+        retry.backoff.ms: 100
 
-logging:
-  level:
-    com.zaxxer.hikari: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.security.web.FilterChainProxy: TRACE
+message-system:
+  kafka:
+    listeners:
+      push:
+        topic: push-notification
+
+#logging:
+#  level:
+#    com.zaxxer.hikari: DEBUG
+#    org.springframework.security: DEBUG
+#    org.springframework.security.web.FilterChainProxy: TRACE

@@ -3,6 +3,7 @@ package com.rodemtree.chatservice.service;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.dto.domain.ChannelId;
 import com.rodemtree.chatservice.dto.domain.UserId;
+import com.rodemtree.chatservice.dto.kafka.outbound.MessageNotificationRecord;
 import com.rodemtree.chatservice.dto.websocket.outbound.BaseMessage;
 import com.rodemtree.chatservice.entity.MessageEntity;
 import com.rodemtree.chatservice.repository.MessageRepository;
@@ -40,7 +41,7 @@ public class MessageService {
         this.jsonUtil = jsonUtil;
         this.messageRepository = messageRepository;
 
-        pushService.registerPushMessageType(MessageType.NOTIFY_MESSAGE);
+        pushService.registerPushMessageType(MessageType.NOTIFY_MESSAGE, MessageNotificationRecord.class);
     }
 
     @Transactional
