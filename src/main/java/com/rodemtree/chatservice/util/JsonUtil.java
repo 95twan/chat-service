@@ -1,6 +1,7 @@
 package com.rodemtree.chatservice.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,17 @@ public class JsonUtil {
             return Optional.of(objectMapper.writeValueAsString(object));
         } catch (Exception e) {
             log.error("Failed Object to JSON: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<String> addValue(String json, String key, String value) {
+        try {
+            ObjectNode node = (ObjectNode) objectMapper.readTree(json);
+            node.put(key, value);
+            return Optional.of(objectMapper.writeValueAsString(node));
+        } catch (Exception ex) {
+            log.error("Failed adding value to JSON: {}, cause: {}", json, ex.getMessage());
             return Optional.empty();
         }
     }
