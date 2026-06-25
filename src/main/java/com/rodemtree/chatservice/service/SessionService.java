@@ -29,11 +29,6 @@ public class SessionService {
     private final long TTL = 300;
 
 
-    public String getUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
-    }
-
     public List<UserId> getOnlineParticipants(ChannelId channelId, List<UserId> userIds) {
         List<String> channelIdKeys = userIds.stream().map(this::buildChannelIdKey).toList();
         List<String> channelIds = cacheService.get(channelIdKeys);

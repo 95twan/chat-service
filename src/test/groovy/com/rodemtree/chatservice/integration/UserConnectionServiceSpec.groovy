@@ -5,6 +5,7 @@ import com.rodemtree.chatservice.constant.KeyPrefix
 import com.rodemtree.chatservice.constant.UserConnectionStatus
 import com.rodemtree.chatservice.dto.domain.UserId
 import com.rodemtree.chatservice.entity.UserConnectionId
+import com.rodemtree.chatservice.entity.UserEntity
 import com.rodemtree.chatservice.repository.UserConnectionRepository
 import com.rodemtree.chatservice.repository.UserRepository
 import com.rodemtree.chatservice.service.CacheService
@@ -41,7 +42,7 @@ class UserConnectionServiceSpec extends Specification {
     def "연결 요청 수락은 연결 제한 수를 넘을 수 없다."() {
         given:
         userConnectionLimitService.setLimitConnection(10)
-        (0..19).collect { userService.addUser("testUser${it}", "testpass${it}") }
+        (0..19).collect { addUser("testUser${it}", "testpass${it}") }
         def userIdA = userService.getUserId("testuser0").get()
         def inviteCodeA = userService.getInviteCode(userIdA).get()
         (1..9).collect {
@@ -70,7 +71,7 @@ class UserConnectionServiceSpec extends Specification {
 
     def "연결 종료는 연결 카운트 0보다 작을 수 없다."() {
         given:
-        (0..10).collect { userService.addUser("testUser${it}", "testpass${it}") }
+        (0..10).collect {addUser("testUser${it}", "testpass${it}") }
         def userIdA = userService.getUserId("testuser0").get()
         def inviteCodeA = userService.getInviteCode(userIdA).get()
         (1..10).collect {
@@ -94,6 +95,11 @@ class UserConnectionServiceSpec extends Specification {
         then:
         results.count { it == true } == 5
         userService.getConnectionCount(userService.getUserId("testuser0").get()).get() == 0
+    }
+
+    def addUser(String username, String password) {
+        UserEntity userEntity = userRepository.save(new UserEntity(username, password));
+        return new UserId(userEntity.getUserId());
     }
 
     def cleanup() {
