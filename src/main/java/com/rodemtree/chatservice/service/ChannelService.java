@@ -3,14 +3,12 @@ package com.rodemtree.chatservice.service;
 import com.rodemtree.chatservice.constant.KeyPrefix;
 import com.rodemtree.chatservice.constant.ResultType;
 import com.rodemtree.chatservice.constant.UserConnectionStatus;
-import com.rodemtree.chatservice.dto.domain.Channel;
-import com.rodemtree.chatservice.dto.domain.ChannelId;
-import com.rodemtree.chatservice.dto.domain.InviteCode;
-import com.rodemtree.chatservice.dto.domain.UserId;
+import com.rodemtree.chatservice.dto.domain.*;
 import com.rodemtree.chatservice.dto.projection.ChannelTitleProjection;
 import com.rodemtree.chatservice.entity.ChannelEntity;
 import com.rodemtree.chatservice.entity.UserChannelEntity;
 import com.rodemtree.chatservice.repository.ChannelRepository;
+import com.rodemtree.chatservice.repository.MessageRepository;
 import com.rodemtree.chatservice.repository.UserChannelRepository;
 import com.rodemtree.chatservice.util.JsonUtil;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +33,7 @@ public class ChannelService {
     private final SessionService sessionService;
     private final UserConnectionService userConnectionService;
     private final CacheService cacheService;
+    private final MessageRepository messageRepository;
     private final ChannelRepository channelRepository;
     private final UserChannelRepository userChannelRepository;
     private final JsonUtil jsonUtil;
@@ -197,7 +196,7 @@ public class ChannelService {
     }
 
     @Transactional(readOnly = true)
-    public Pair<Optional<String>, ResultType> enterChannel(UserId userId, ChannelId channelId) {
+    public Pair<Optional<ChannelEntry>, ResultType> enterChannel(UserId userId, ChannelId channelId) {
         if (!isJoined(userId, channelId)) {
             log.warn("Enter channel failed. User not joined the channel. userId: {}, channelId: {}", userId.id(), channelId.id());
             return Pair.of(Optional.empty(), ResultType.NOT_JOINED);
@@ -209,8 +208,18 @@ public class ChannelService {
             return Pair.of(Optional.empty(), ResultType.NOT_FOUND);
         }
 
+        Optional<MessageSeqId> lastReadMessageSeq = userChannelRepository.findLastReadMessageSeqByUserIdAndChannelId(userId.id(), channelId.id())
+                .map(projection -> new MessageSeqId(projection.getLastReadMessageSeq()));
+        if (lastReadMessageSeq.isEmpty()) {
+            log.error("Enter channel failed. No record found for UserId: {} and ChannelId: {}", userId.id(), channelId.id());
+            return Pair.of(Optional.empty(), ResultType.NOT_FOUND);
+        }
+
+        MessageSeqId lastMessageSeqId = messageRepository.findLastMessageSequenceByChannelId(channelId.id())
+                .map(MessageSeqId::new).orElse(new MessageSeqId(0L));
+
         if (sessionService.setActiveChannel(userId, channelId)) {
-            return Pair.of(title, ResultType.SUCCESS);
+            return Pair.of(Optional.of(new ChannelEntry(title.get(), lastReadMessageSeq.get(), lastMessageSeqId)), ResultType.SUCCESS);
         }
 
         log.error("Enter channel failed. userId: {}, channelId: {}", userId.id(), channelId.id());

@@ -1,9 +1,6 @@
 package com.rodemtree.chatservice.repository;
 
-import com.rodemtree.chatservice.dto.projection.ConnectionCountProjection;
-import com.rodemtree.chatservice.dto.projection.InviteCodeProjection;
-import com.rodemtree.chatservice.dto.projection.UserIdProjection;
-import com.rodemtree.chatservice.dto.projection.UsernameProjection;
+import com.rodemtree.chatservice.dto.projection.*;
 import com.rodemtree.chatservice.entity.UserEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +16,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserIdProjection> findUserIdByUsername(@NonNull String username);
 
     List<UserIdProjection> findUserIdsByUsernameIn(@NonNull Collection<String> usernames);
+
+    List<UserIdUsernameProjection> findUserIdUsernamesByUserIdIn(@NonNull Collection<Long> userIds);
 
     Optional<UsernameProjection> findUsernameByUserId(@NonNull Long userId);
 

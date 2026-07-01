@@ -8,12 +8,17 @@ import java.util.Objects;
 @Getter
 @Entity
 @Table(name = "message")
+@IdClass(ChannelMessageSeqId.class)
 public class MessageEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "channel_id")
+    private Long channelId;
+
+    @Id
     @Column(name = "message_sequence")
     private Long messageSequence;
+
 
     @Column(name = "sender_user_id", nullable = false)
     private Long senderUserId;
@@ -25,7 +30,9 @@ public class MessageEntity extends BaseEntity {
     public MessageEntity() {
     }
 
-    public MessageEntity(Long senderUserId, String content) {
+    public MessageEntity(Long channelId, Long messageSequence, Long senderUserId, String content) {
+        this.channelId = channelId;
+        this.messageSequence = messageSequence;
         this.senderUserId = senderUserId;
         this.content = content;
     }
@@ -34,17 +41,16 @@ public class MessageEntity extends BaseEntity {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MessageEntity that = (MessageEntity) o;
-        return Objects.equals(messageSequence, that.messageSequence);
+        return Objects.equals(channelId, that.channelId) && Objects.equals(messageSequence, that.messageSequence);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(messageSequence);
+        return Objects.hash(channelId, messageSequence);
     }
 
     @Override
     public String toString() {
-        return "MessageEntity{messageSequence=%d, senderUserId=%d, content='%s', createdAt=%s, updatedAt=%s}"
-                .formatted(messageSequence, senderUserId, content, getCreatedAt(), getUpdatedAt());
+        return "MessageEntity{channelId=%d, messageSequence=%d, senderUserId=%d, content='%s'}".formatted(channelId, messageSequence, senderUserId, content);
     }
 }

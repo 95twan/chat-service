@@ -1,18 +1,17 @@
 package com.rodemtree.chatservice.service;
 
-import com.rodemtree.chatservice.constant.IdKey;
-import com.rodemtree.chatservice.constant.KeyPrefix;
-import com.rodemtree.chatservice.dto.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -50,6 +49,24 @@ public class CacheService {
             return true;
         } catch (Exception ex) {
             log.error("Redis set failed. key: {}, cause: {}", key, ex.getMessage());
+        }
+        return false;
+    }
+
+    public boolean set(Map<String, String> map, Long ttlSeconds) {
+        try {
+            stringRedisTemplate.executePipelined(new SessionCallback<>() {
+                @Nullable
+                @Override
+                @SuppressWarnings("unchecked")
+                public <K, V> Object execute(@NonNull RedisOperations<K, V> operations) throws DataAccessException {
+                    map.forEach((key, value) -> operations.opsForValue().set((K) key, (V) value, ttlSeconds, TimeUnit.SECONDS));
+                    return null;
+                }
+            });
+            return true;
+        } catch (Exception ex) {
+            log.error("Redis multi set failed. keys: {}, cause: {}", map.keySet(), ex.getMessage());
         }
         return false;
     }

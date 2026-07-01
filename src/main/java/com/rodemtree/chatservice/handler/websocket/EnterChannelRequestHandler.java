@@ -3,6 +3,7 @@ package com.rodemtree.chatservice.handler.websocket;
 import com.rodemtree.chatservice.constant.IdKey;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.constant.ResultType;
+import com.rodemtree.chatservice.dto.domain.ChannelEntry;
 import com.rodemtree.chatservice.dto.domain.UserId;
 import com.rodemtree.chatservice.dto.websocket.inbound.EnterChannelRequest;
 import com.rodemtree.chatservice.dto.websocket.outbound.EnterChannelResponse;
@@ -33,13 +34,26 @@ public class EnterChannelRequestHandler implements BaseRequestHandler<EnterChann
     public void handle(WebSocketSession senderSession, EnterChannelRequest request) {
         UserId enterUserId = (UserId) senderSession.getAttributes().get(IdKey.USER_ID.getValue());
 
-        Pair<Optional<String>, ResultType> result = channelService.enterChannel(enterUserId, request.getChannelId());
+        Pair<Optional<ChannelEntry>, ResultType> result = channelService.enterChannel(enterUserId, request.getChannelId());
 
-        result.getFirst().ifPresentOrElse(title -> {
-            clientNotificationService.sendMessage(senderSession, enterUserId, new EnterChannelResponse(request.getChannelId(), title));
+        result.getFirst().ifPresentOrElse(channelEntry -> {
+            clientNotificationService.sendMessage(
+                    senderSession,
+                    enterUserId,
+                    new EnterChannelResponse(
+                            request.getChannelId(),
+                            channelEntry.title(),
+                            channelEntry.lastReadMessageSeqId(),
+                            channelEntry.lastChannelMessageSeqId()
+                    )
+            );
         }, () -> {
             String errorMessage = result.getSecond().getMessage();
-            clientNotificationService.sendMessage(senderSession, enterUserId, new ErrorResponse(MessageType.ENTER_CHANNEL_REQUEST, errorMessage));
+            clientNotificationService.sendMessage(
+                    senderSession,
+                    enterUserId,
+                    new ErrorResponse(MessageType.ENTER_CHANNEL_REQUEST, errorMessage)
+            );
         });
     }
 }
