@@ -22,6 +22,8 @@ import lombok.Getter;
         @JsonSubTypes.Type(value = LeaveChannelRequest.class, name = MessageType.LEAVE_CHANNEL_REQUEST),
         @JsonSubTypes.Type(value = QuitChannelRequest.class, name = MessageType.QUIT_CHANNEL_REQUEST),
         @JsonSubTypes.Type(value = WriteMessage.class, name = MessageType.WRITE_MESSAGE),
+        @JsonSubTypes.Type(value = ReadMessageAck.class, name = MessageType.READ_MESSAGE_ACK),
+        @JsonSubTypes.Type(value = FetchMessagesRequest.class, name = MessageType.FETCH_MESSAGES_REQUEST),
         @JsonSubTypes.Type(value = KeepAlive.class, name = MessageType.KEEP_ALIVE)
 })
 public abstract class BaseRequest {

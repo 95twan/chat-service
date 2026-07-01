@@ -49,6 +49,9 @@ services:
       - "16000:6379"
     volumes:
       - ./data/redis/data:/data
+    command: >
+      redis-server
+      --appendonly yes
 
   redis-insight:
     image: redis/redisinsight:2.70.1

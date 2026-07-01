@@ -4,24 +4,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rodemtree.chatservice.constant.MessageType;
 import com.rodemtree.chatservice.dto.domain.ChannelId;
+import com.rodemtree.chatservice.dto.domain.MessageSeqId;
 import lombok.Getter;
 
 @Getter
-public class WriteMessage extends BaseRequest {
+public class ReadMessageAck extends BaseRequest {
 
-    private final Long serial;
     private final ChannelId channelId;
-    private final String content;
+    private final MessageSeqId messageSeqId;
 
     @JsonCreator
-    public WriteMessage(
-            @JsonProperty("serial") Long serial,
+    public ReadMessageAck(
             @JsonProperty("channelId") ChannelId channelId,
-            @JsonProperty("content") String content
+            @JsonProperty("messageSeqId") MessageSeqId messageSeqId
     ) {
-        super(MessageType.WRITE_MESSAGE);
-        this.serial = serial;
+        super(MessageType.READ_MESSAGE_ACK);
         this.channelId = channelId;
-        this.content = content;
+        this.messageSeqId = messageSeqId;
     }
 }

@@ -1,6 +1,7 @@
 package com.rodemtree.chatservice.constant;
 
 public class MessageType {
+    // Connection
     public static final String FETCH_USER_INVITE_CODE_REQUEST = "FETCH_USER_INVITE_CODE_REQUEST";
     public static final String FETCH_USER_INVITE_CODE_RESPONSE = "FETCH_USER_INVITE_CODE_RESPONSE";
     public static final String FETCH_CONNECTIONS_REQUEST = "FETCH_CONNECTIONS_REQUEST";
@@ -13,6 +14,8 @@ public class MessageType {
     public static final String REJECT_INVITE_RESPONSE = "REJECT_INVITE_RESPONSE";
     public static final String DISCONNECT_REQUEST = "DISCONNECT_REQUEST";
     public static final String DISCONNECT_RESPONSE = "DISCONNECT_RESPONSE";
+
+    // Channel
     public static final String FETCH_CHANNEL_INVITE_CODE_REQUEST = "FETCH_CHANNEL_INVITE_CODE_REQUEST";
     public static final String FETCH_CHANNEL_INVITE_CODE_RESPONSE = "FETCH_CHANNEL_INVITE_CODE_RESPONSE";
     public static final String FETCH_CHANNELS_REQUEST = "FETCH_CHANNELS_REQUEST";
@@ -27,7 +30,15 @@ public class MessageType {
     public static final String LEAVE_CHANNEL_RESPONSE = "LEAVE_CHANNEL_RESPONSE";
     public static final String QUIT_CHANNEL_REQUEST = "QUIT_CHANNEL_REQUEST";
     public static final String QUIT_CHANNEL_RESPONSE = "QUIT_CHANNEL_RESPONSE";
+
+    // Message
     public static final String WRITE_MESSAGE = "WRITE_MESSAGE";
+    public static final String FETCH_MESSAGES_REQUEST = "FETCH_MESSAGES_REQUEST";
+    public static final String FETCH_MESSAGES_RESPONSE = "FETCH_MESSAGES_RESPONSE";
+
+    // Ack
+    public static final String READ_MESSAGE_ACK = "READ_MESSAGE_ACK";
+    public static final String WRITE_MESSAGE_ACK = "WRITE_MESSAGE_ACK";
 
     // Notification
     public static final String ASK_INVITE = "ASK_INVITE";
