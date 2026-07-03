@@ -43,6 +43,94 @@ services:
       --enforce_gtid_consistency=ON
       --read-only=ON
 
+  mysql-source-message1:
+    image: mysql:8.0.44
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: chatsystem
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3002:3306"
+    volumes:
+      - ./data/mysql-message1:/var/lib/mysql
+      - ./init-scripts-source:/docker-entrypoint-initdb.d
+    command: >
+      --server-id=3
+      --log-bin=/var/lib/mysql/mysql-bin.log
+      --gtid-mode=ON
+      --enforce_gtid_consistency=ON
+
+  mysql-replica-message1:
+    image: mysql:8.0.44
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3003:3306"
+    volumes:
+      - ./data/mysql-replica-message1:/var/lib/mysql
+      - ./init-scripts-replica-message1:/docker-entrypoint-initdb.d
+    depends_on:
+      mysql-source-message1:
+        condition: service_healthy
+    command: >
+      --server-id=4
+      --relay-log=/var/lib/mysql/mysql-relay-bin.log
+      --gtid-mode=ON
+      --enforce_gtid_consistency=ON
+      --read-only=ON
+
+  mysql-source-message2:
+    image: mysql:8.0.44
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: chatsystem
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3004:3306"
+    volumes:
+      - ./data/mysql-message2:/var/lib/mysql
+      - ./init-scripts-source:/docker-entrypoint-initdb.d
+    command: >
+      --server-id=5
+      --log-bin=/var/lib/mysql/mysql-bin.log
+      --gtid-mode=ON
+      --enforce_gtid_consistency=ON
+
+  mysql-replica-message2:
+    image: mysql:8.0.44
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3005:3306"
+    volumes:
+      - ./data/mysql-replica-message2:/var/lib/mysql
+      - ./init-scripts-replica-message2:/docker-entrypoint-initdb.d
+    depends_on:
+      mysql-source-message2:
+        condition: service_healthy
+    command: >
+      --server-id=6
+      --relay-log=/var/lib/mysql/mysql-relay-bin.log
+      --gtid-mode=ON
+      --enforce_gtid_consistency=ON
+      --read-only=ON
+
   redis:
     image: redis:7.4.9
     ports:

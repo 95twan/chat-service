@@ -10,8 +10,6 @@ import com.rodemtree.chatservice.dto.kafka.outbound.MessageNotificationRecord;
 import com.rodemtree.chatservice.dto.projection.MessageInfoProjection;
 import com.rodemtree.chatservice.dto.websocket.outbound.BaseMessage;
 import com.rodemtree.chatservice.dto.websocket.outbound.WriteMessageAck;
-import com.rodemtree.chatservice.entity.MessageEntity;
-import com.rodemtree.chatservice.repository.MessageRepository;
 import com.rodemtree.chatservice.repository.UserChannelRepository;
 import com.rodemtree.chatservice.session.WebSocketSessionManager;
 import com.rodemtree.chatservice.util.JsonUtil;
@@ -39,8 +37,8 @@ public class MessageService {
     private final ChannelService channelService;
     private final PushService pushService;
     private final WebSocketSessionManager webSocketSessionManager;
+    private final MessageShardService messageShardService;
     private final JsonUtil jsonUtil;
-    private final MessageRepository messageRepository;
     private final UserChannelRepository userChannelRepository;
     private final ExecutorService senderThreadPool = Executors.newFixedThreadPool(SENDER_THREAD_POOL_SIZE);
 
@@ -49,16 +47,16 @@ public class MessageService {
             ChannelService channelService,
             PushService pushService,
             WebSocketSessionManager webSocketSessionManager,
+            MessageShardService messageShardService,
             JsonUtil jsonUtil,
-            MessageRepository messageRepository,
             UserChannelRepository userChannelRepository
     ) {
         this.userService = userService;
         this.channelService = channelService;
         this.pushService = pushService;
         this.webSocketSessionManager = webSocketSessionManager;
+        this.messageShardService = messageShardService;
         this.jsonUtil = jsonUtil;
-        this.messageRepository = messageRepository;
         this.userChannelRepository = userChannelRepository;
 
         pushService.registerPushMessageType(MessageType.NOTIFY_MESSAGE, MessageNotificationRecord.class);
@@ -66,7 +64,7 @@ public class MessageService {
 
     @Transactional(readOnly = true)
     public Pair<List<Message>, ResultType> getMessages(ChannelId channelId, MessageSeqId startMessageSeqId, MessageSeqId endMessageSeqId) {
-        List<MessageInfoProjection> messageInfos = messageRepository.findMessageInfoByChannelIdAndMessageSequenceBetween(channelId.id(), startMessageSeqId.id(), endMessageSeqId.id());
+        List<MessageInfoProjection> messageInfos = messageShardService.findMessageInfoByChannelIdAndMessageSequenceBetween(channelId, startMessageSeqId, endMessageSeqId);
         Set<UserId> userIds = messageInfos.stream()
                 .map(projection -> new UserId(projection.getSenderUserId()))
                 .collect(Collectors.toUnmodifiableSet());
@@ -112,7 +110,7 @@ public class MessageService {
         String payload = json.get();
 
         try {
-            messageRepository.save(new MessageEntity(channelId.id(), messageSeqId.id(), senderUserId.id(), content));
+            messageShardService.save(channelId, messageSeqId, senderUserId, content);
         } catch (Exception ex) {
             log.error("Send message failed. cause: {}", ex.getMessage());
             return;
