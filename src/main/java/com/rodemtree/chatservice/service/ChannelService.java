@@ -8,7 +8,6 @@ import com.rodemtree.chatservice.dto.projection.ChannelTitleProjection;
 import com.rodemtree.chatservice.entity.ChannelEntity;
 import com.rodemtree.chatservice.entity.UserChannelEntity;
 import com.rodemtree.chatservice.repository.ChannelRepository;
-import com.rodemtree.chatservice.repository.MessageRepository;
 import com.rodemtree.chatservice.repository.UserChannelRepository;
 import com.rodemtree.chatservice.util.JsonUtil;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,7 +32,7 @@ public class ChannelService {
     private final SessionService sessionService;
     private final UserConnectionService userConnectionService;
     private final CacheService cacheService;
-    private final MessageRepository messageRepository;
+    private final MessageShardService messageShardService;
     private final ChannelRepository channelRepository;
     private final UserChannelRepository userChannelRepository;
     private final JsonUtil jsonUtil;
@@ -215,8 +214,7 @@ public class ChannelService {
             return Pair.of(Optional.empty(), ResultType.NOT_FOUND);
         }
 
-        MessageSeqId lastMessageSeqId = messageRepository.findLastMessageSequenceByChannelId(channelId.id())
-                .map(MessageSeqId::new).orElse(new MessageSeqId(0L));
+        MessageSeqId lastMessageSeqId = messageShardService.findLastMessageSequenceByChannelId(channelId);
 
         if (sessionService.setActiveChannel(userId, channelId)) {
             return Pair.of(Optional.of(new ChannelEntry(title.get(), lastReadMessageSeq.get(), lastMessageSeqId)), ResultType.SUCCESS);

@@ -2,6 +2,7 @@ package com.rodemtree.chatservice.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rodemtree.chatservice.ChatApplication
+import com.rodemtree.chatservice.database.ShardContext
 import com.rodemtree.chatservice.dto.domain.ChannelId
 import com.rodemtree.chatservice.dto.domain.UserId
 import com.rodemtree.chatservice.dto.websocket.inbound.WriteMessage
@@ -36,7 +37,7 @@ import java.util.concurrent.TimeUnit
 )
 class WebSocketHandlerSpec extends Specification {
 
-    int restPort = 8080
+    int restPort = 8081
 
     @LocalServerPort
     int port
@@ -117,7 +118,9 @@ class WebSocketHandlerSpec extends Specification {
 
     def deleteMessage(List<String> results) {
         def seqIds = results.collectMany { text -> (text =~ /"messageSeqId":(\d+)/).collect { it[1] } }
-        seqIds.forEach { messageRepository.deleteById(new ChannelMessageSeqId(1, it as Long)) }
+        try (ShardContext.ShardContextScope ignored = new ShardContext.ShardContextScope(1)) {
+            seqIds.forEach { messageRepository.deleteById(new ChannelMessageSeqId(1, it as Long)) }
+        }
     }
 
     def register(String username, String password) {
