@@ -78,8 +78,14 @@ spring:
       mode: never
   data:
     redis:
-      host: ${REDIS_URL}
-      port: 6379
+      cluster:
+        nodes:
+          - ${REDIS_NODE_1_URL}
+          - ${REDIS_NODE_2_URL}
+          - ${REDIS_NODE_3_URL}
+          - ${REDIS_NODE_4_URL}
+          - ${REDIS_NODE_5_URL}
+          - ${REDIS_NODE_6_URL}
       repositories:
         enabled: false
   kafka:
