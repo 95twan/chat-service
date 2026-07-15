@@ -78,11 +78,11 @@ public class ChannelService {
         if (cachedParticipantIds.isPresent()) {
             return jsonUtil.fromJsonToList(cachedParticipantIds.get(), String.class).stream()
                     .map(userId -> new UserId(Long.valueOf(userId)))
-                    .toList();
+                    .collect(Collectors.toList());
         }
         List<UserId> fromDB = userChannelRepository.findUserIdsByChannelId(channelId.id()).stream()
                 .map(userId -> new UserId(userId.getUserId()))
-                .toList();
+                .collect(Collectors.toList());
         if (!fromDB.isEmpty()) {
             jsonUtil.toJson(fromDB.stream().map(UserId::id).toList()).ifPresent(json -> cacheService.set(key, json, TTL));
         }

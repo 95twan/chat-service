@@ -1,17 +1,14 @@
 package com.rodemtree.chatservice.service;
 
 import com.rodemtree.chatservice.constant.MessageType;
+import com.rodemtree.chatservice.dto.domain.ChannelId;
 import com.rodemtree.chatservice.dto.domain.UserId;
-import com.rodemtree.chatservice.dto.kafka.outbound.*;
-import com.rodemtree.chatservice.dto.websocket.outbound.BaseMessage;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
+import com.rodemtree.chatservice.dto.kafka.*;
+import com.rodemtree.chatservice.kafka.KafkaProducer;
 import com.rodemtree.chatservice.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketSession;
-
-import java.util.Optional;
 
 @Service
 public class ClientNotificationService {
@@ -19,13 +16,15 @@ public class ClientNotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(ClientNotificationService.class);
 
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final SessionService sessionService;
+    private final KafkaProducer kafkaProducer;
     private final PushService pushService;
     private final JsonUtil jsonUtil;
 
 
-    public ClientNotificationService(WebSocketSessionManager webSocketSessionManager, PushService pushService, JsonUtil jsonUtil) {
-        this.webSocketSessionManager = webSocketSessionManager;
+    public ClientNotificationService(SessionService sessionService, KafkaProducer kafkaProducer, PushService pushService, JsonUtil jsonUtil) {
+        this.sessionService = sessionService;
+        this.kafkaProducer = kafkaProducer;
         this.pushService = pushService;
         this.jsonUtil = jsonUtil;
 
@@ -40,30 +39,27 @@ public class ClientNotificationService {
         pushService.registerPushMessageType(MessageType.QUIT_CHANNEL_RESPONSE, QuitChannelResponseRecord.class);
     }
 
-    public void sendMessage(WebSocketSession session, UserId userId, BaseMessage message) {
-        sendPayload(session, userId, message);
+    public void sendMessage(UserId userId, RecordInterface recordInterface) {
+        sessionService.getListenTopic(userId).ifPresentOrElse(
+                topic -> kafkaProducer.sendResponse(topic, recordInterface),
+                () -> pushService.pushMessage(recordInterface)
+        );
     }
 
-    public void sendMessage(UserId userId, BaseMessage message) {
-        sendPayload(webSocketSessionManager.getSession(userId), userId, message);
+    public void sendMessageUsingPartitionKey(ChannelId channelId, UserId userId, RecordInterface recordInterface) {
+        sessionService.getListenTopic(userId).ifPresentOrElse(
+                topic -> kafkaProducer.sendMessageUsingPartitionKey(topic, channelId, userId, recordInterface),
+                () -> pushService.pushMessage(recordInterface)
+        );
     }
 
-    private void sendPayload(WebSocketSession session, UserId userId, BaseMessage message) {
-        Optional<String> json = jsonUtil.toJson(message);
-        if (json.isEmpty()) {
-            log.error("Send message failed. MessageType: {}", message.getType());
-            return;
-        }
-
-        String payload = json.get();
-        try {
-            if (session != null) {
-                webSocketSessionManager.sendMessage(session, payload);
-            } else {
-                pushService.pushMessage(userId, message.getType(), payload);
-            }
-        } catch (Exception ex) {
-            pushService.pushMessage(userId, message.getType(), payload);
-        }
+    public void sendError(ErrorResponseRecord errorResponseRecord) {
+        sessionService.getListenTopic(errorResponseRecord.userId()).ifPresentOrElse(
+                topic -> kafkaProducer.sendResponse(topic, errorResponseRecord),
+                () -> log.warn("Send error failed. Type: {}, Error: {}, User: {} is offline",
+                        errorResponseRecord.type(),
+                        errorResponseRecord.message(),
+                        errorResponseRecord.userId())
+        );
     }
 }

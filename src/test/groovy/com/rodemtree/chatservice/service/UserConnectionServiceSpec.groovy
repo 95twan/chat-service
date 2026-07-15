@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
+
 import com.rodemtree.chatservice.constant.UserConnectionStatus
 import com.rodemtree.chatservice.dto.domain.InviteCode
 import com.rodemtree.chatservice.dto.domain.User
@@ -15,7 +15,6 @@ import com.rodemtree.chatservice.util.JsonUtil
 import org.springframework.data.util.Pair
 import spock.lang.Specification
 
-
 class UserConnectionServiceSpec extends Specification {
 
     UserConnectionService userConnectionService
@@ -27,7 +26,7 @@ class UserConnectionServiceSpec extends Specification {
 
     def setup() {
         userConnectionLimitService = new UserConnectionLimitService(cacheService, userRepository, userConnectionRepository)
-        userConnectionService = new UserConnectionService(userService, userConnectionLimitService, cacheService, userConnectionRepository, new JsonUtil(new ObjectMapper()))
+        userConnectionService = new UserConnectionService(userService, userConnectionLimitService, cacheService, userConnectionRepository, new JsonUtil())
     }
 
     def "사용자 연결 신청에 대한 테스트."() {

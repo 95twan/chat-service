@@ -1,7 +1,7 @@
 package com.rodemtree.chatservice.constant;
 
 public class KeyPrefix {
-    public static final String USER_SESSION = "chat:user_session";
+    public static final String USER_SESSION_LOCATION = "chat:user_session_location";
     public static final String USER = "chat:user";
     public static final String USERNAME = "chat:user:username";
     public static final String USER_ID = "chat:user:user_id";
