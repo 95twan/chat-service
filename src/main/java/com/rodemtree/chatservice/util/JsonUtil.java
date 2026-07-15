@@ -16,7 +16,7 @@ import java.util.Optional;
 public class JsonUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JsonUtil.class);
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public <T> Optional<T> fromJson(String json, Class<T> clazz) {

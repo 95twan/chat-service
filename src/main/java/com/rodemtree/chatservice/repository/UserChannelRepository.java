@@ -33,7 +33,7 @@ public interface UserChannelRepository extends JpaRepository<UserChannelEntity, 
     @Modifying
     @Query(
             "update UserChannelEntity uc set uc.lastReadMessageSeq = :lastReadMessageSeq " +
-                    "where uc.userId = :userId and uc.channelId = :channelId"
+                    "where uc.userId = :userId and uc.channelId = :channelId and uc.lastReadMessageSeq < :lastReadMessageSeq"
     )
     int updateLastReadMessageSeqByUserIdAndChannelId(
             @NonNull @Param("userId") Long userId,

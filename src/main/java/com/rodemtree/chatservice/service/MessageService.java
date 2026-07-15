@@ -6,24 +6,22 @@ import com.rodemtree.chatservice.dto.domain.ChannelId;
 import com.rodemtree.chatservice.dto.domain.Message;
 import com.rodemtree.chatservice.dto.domain.MessageSeqId;
 import com.rodemtree.chatservice.dto.domain.UserId;
-import com.rodemtree.chatservice.dto.kafka.outbound.MessageNotificationRecord;
+import com.rodemtree.chatservice.dto.kafka.MessageNotificationRecord;
+import com.rodemtree.chatservice.dto.kafka.WriteMessageAckRecord;
+import com.rodemtree.chatservice.dto.kafka.WriteMessageRecord;
 import com.rodemtree.chatservice.dto.projection.MessageInfoProjection;
-import com.rodemtree.chatservice.dto.websocket.outbound.BaseMessage;
-import com.rodemtree.chatservice.dto.websocket.outbound.WriteMessageAck;
+import com.rodemtree.chatservice.kafka.KafkaProducer;
 import com.rodemtree.chatservice.repository.UserChannelRepository;
-import com.rodemtree.chatservice.session.WebSocketSessionManager;
-import com.rodemtree.chatservice.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.socket.WebSocketSession;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -31,32 +29,30 @@ import java.util.stream.Collectors;
 public class MessageService {
 
     private static final Logger log = LoggerFactory.getLogger(MessageService.class);
-    private static final int SENDER_THREAD_POOL_SIZE = 10;
 
     private final UserService userService;
     private final ChannelService channelService;
     private final PushService pushService;
-    private final WebSocketSessionManager webSocketSessionManager;
+    private final SessionService sessionService;
+    private final KafkaProducer kafkaProducer;
     private final MessageShardService messageShardService;
-    private final JsonUtil jsonUtil;
     private final UserChannelRepository userChannelRepository;
-    private final ExecutorService senderThreadPool = Executors.newFixedThreadPool(SENDER_THREAD_POOL_SIZE);
 
     public MessageService(
             UserService userService,
             ChannelService channelService,
             PushService pushService,
-            WebSocketSessionManager webSocketSessionManager,
+            SessionService sessionService,
+            KafkaProducer kafkaProducer,
             MessageShardService messageShardService,
-            JsonUtil jsonUtil,
             UserChannelRepository userChannelRepository
     ) {
         this.userService = userService;
         this.channelService = channelService;
         this.pushService = pushService;
-        this.webSocketSessionManager = webSocketSessionManager;
+        this.sessionService = sessionService;
+        this.kafkaProducer = kafkaProducer;
         this.messageShardService = messageShardService;
-        this.jsonUtil = jsonUtil;
         this.userChannelRepository = userChannelRepository;
 
         pushService.registerPushMessageType(MessageType.NOTIFY_MESSAGE, MessageNotificationRecord.class);
@@ -94,20 +90,13 @@ public class MessageService {
     }
 
     @Transactional
-    public void sendMessage(
-            UserId senderUserId,
-            ChannelId channelId,
-            MessageSeqId messageSeqId,
-            Long serial,
-            String content,
-            BaseMessage message
-    ) {
-        Optional<String> json = jsonUtil.toJson(message);
-        if (json.isEmpty()) {
-            log.error("Send message failed. messageType: {}", message.getType());
-            return;
-        }
-        String payload = json.get();
+    public void sendMessage(WriteMessageRecord record) {
+        ChannelId channelId = record.channelId();
+        UserId senderUserId = record.userId();
+        MessageSeqId messageSeqId = record.messageSeqId();
+        String senderUsername = userService.getUsername(senderUserId).orElse("unknown");
+        Long serial = record.serial();
+        String content = record.content();
 
         try {
             messageShardService.save(channelId, messageSeqId, senderUserId, content);
@@ -119,56 +108,28 @@ public class MessageService {
         List<UserId> allParticipants = channelService.getParticipantIds(channelId);
         List<UserId> onlineParticipants = channelService.getOnlineParticipantIds(channelId, allParticipants);
 
-        for (int i = 0; i < allParticipants.size(); i++) {
-            UserId participantId = allParticipants.get(i);
-            if (senderUserId.equals(participantId)) {
+        Map<String, List<UserId>> listenTopics = sessionService.getListenTopics(onlineParticipants);
+        allParticipants.removeAll(onlineParticipants);
+
+        listenTopics.forEach((listenTopic, participantIds) -> {
+            if (participantIds.contains(senderUserId)) {
                 updateLastReadMessageSeq(senderUserId, channelId, messageSeqId);
-                jsonUtil.toJson(new WriteMessageAck(serial, messageSeqId)).ifPresent(writeMessageAck ->
-                        CompletableFuture.runAsync(() -> {
-                            try {
-                                WebSocketSession session = webSocketSessionManager.getSession(participantId);
-                                if (session != null) {
-                                    webSocketSessionManager.sendMessage(session, writeMessageAck);
-                                }
-                            } catch (Exception ex) {
-                                log.error("Send writeMessageAck failed. userId: {}, cause: {}", participantId.id(), ex.getMessage());
-                            }
-                        }, senderThreadPool)
-                );
-                continue;
+                kafkaProducer.sendMessageUsingPartitionKey(listenTopic, channelId, senderUserId, new WriteMessageAckRecord(senderUserId, serial, messageSeqId));
+                participantIds.remove(senderUserId);
             }
-            if (onlineParticipants.get(i) != null) {
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        WebSocketSession session = webSocketSessionManager.getSession(participantId);
-                        if (session != null) {
-                            webSocketSessionManager.sendMessage(session, payload);
-                        } else {
-                            pushService.pushMessage(participantId, MessageType.NOTIFY_MESSAGE, payload);
-                        }
-                    } catch (Exception ex) {
-                        pushService.pushMessage(participantId, MessageType.NOTIFY_MESSAGE, payload);
-                    }
-                }, senderThreadPool);
-            } else {
-                pushService.pushMessage(participantId, MessageType.NOTIFY_MESSAGE, payload);
-            }
+
+            kafkaProducer.sendMessageUsingPartitionKey(
+                    listenTopic,
+                    channelId,
+                    senderUserId,
+                    new MessageNotificationRecord(senderUserId, channelId, messageSeqId, senderUsername, content, participantIds)
+            );
+        });
+
+        if (!allParticipants.isEmpty()) {
+            pushService.pushMessage(new MessageNotificationRecord(senderUserId, channelId, messageSeqId, senderUsername, content, allParticipants));
         }
 
-        // 반복문을 사용한 메시지 직렬 전송
-//        channelService.getOnlineParticipantIds(channelId).stream()
-//                .filter(participantId -> !participantId.equals(senderUserId))
-//                .forEach(messageSender::accept);
-
-
-        // 쓰레드를 사용한 메시지 병렬 전송
-//        channelService.getOnlineParticipantIds(channelId).stream()
-//                .filter(participantId -> !participantId.equals(senderUserId))
-//                .forEach(participantId -> {
-//                    CompletableFuture.runAsync(() -> {
-//                        messageSender.accept(participantId);
-//                    }, senderThreadPool);
-//                });
     }
 
     @Transactional

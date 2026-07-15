@@ -1,6 +1,6 @@
 package com.rodemtree.chatservice.integration
 
-import com.rodemtree.chatservice.ChatApplication
+import com.rodemtree.chatservice.MessageApplication
 import com.rodemtree.chatservice.constant.KeyPrefix
 import com.rodemtree.chatservice.constant.UserConnectionStatus
 import com.rodemtree.chatservice.dto.domain.UserId
@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles
 import spock.lang.Specification
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = ChatApplication)
+@SpringBootTest(classes = MessageApplication)
 class UserConnectionServiceSpec extends Specification {
 
     @Autowired
