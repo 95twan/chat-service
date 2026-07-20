@@ -116,14 +116,14 @@ public class MessageService {
                 updateLastReadMessageSeq(senderUserId, channelId, messageSeqId);
                 kafkaProducer.sendMessageUsingPartitionKey(listenTopic, channelId, senderUserId, new WriteMessageAckRecord(senderUserId, serial, messageSeqId));
                 participantIds.remove(senderUserId);
+            } else {
+                kafkaProducer.sendMessageUsingPartitionKey(
+                        listenTopic,
+                        channelId,
+                        senderUserId,
+                        new MessageNotificationRecord(senderUserId, channelId, messageSeqId, senderUsername, content, participantIds)
+                );
             }
-
-            kafkaProducer.sendMessageUsingPartitionKey(
-                    listenTopic,
-                    channelId,
-                    senderUserId,
-                    new MessageNotificationRecord(senderUserId, channelId, messageSeqId, senderUsername, content, participantIds)
-            );
         });
 
         if (!allParticipants.isEmpty()) {
